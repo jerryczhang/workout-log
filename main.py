@@ -1,17 +1,8 @@
-from log import LoggedItem
-
-def load_logs():
-    """Load in previously entered logs."""
-    f = open("logs/items.txt", 'r')
-    items = f.read().split()
-    logs = {}
-    for item in items:
-        logs[item] = LoggedItem(item)
-    return logs
+from interface import Interface
 
 def main():
-    logs = load_logs()
-    print("Your logs: " + ", ".join(list(logs.keys())))
+    i = Interface()
+    i.start()
 
 if __name__ == "__main__":
     main()
