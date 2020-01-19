@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from os import path
+from datetime import date
 
 class LoggedItem:
     """Represents one item to track data under."""
@@ -17,10 +18,11 @@ class LoggedItem:
     def add_entry(self, index=None):
         """Add an entry under the item."""
         columns = list(self.data.columns)
-        prompt = "Enter data for columns (" + ", ".join(columns) + "):\n"
+        today = [date.today().strftime("%m/%d/%Y")]
+        prompt = "Enter data for columns (" + ", ".join(columns[1:]) + ") (Enter 'quit' when done):\n"
         user_in = input(prompt)
         while user_in != "quit":
-            data = user_in.split()
+            data = today + user_in.split()
             new_entry = pd.DataFrame([data], columns=columns)
             self.data = self.data.append(new_entry, ignore_index=True)
             self.get_entries()

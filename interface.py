@@ -14,7 +14,7 @@ class Interface:
     def create_item(self, name):
         """Create a new logged item."""
         columns = input("Enter columns for new item: ").split()
-        new_item = LoggedItem(name, columns)
+        new_item = LoggedItem(name, ["date"] + columns)
         return new_item
 
     def get_command(self):
@@ -25,22 +25,6 @@ class Interface:
             print("Invalid input entered: " + command[0])
             command = input(prompt).split()
         return command
-
-    def view(self, parameters):
-        """View the log, with parameters given by user."""
-        item = parameters[0]
-        if item not in self.logs:
-            self.logs[item] = self.create_item(item)
-        self.logs[item].get_entries()
-
-    def log(self, parameters):
-        """Add new entries to an item."""
-        item = parameters[0]
-        self.logs[item].add_entry()
-
-    def list(self):
-        """List logged items."""
-        print("Your items: " + ", ".join(list(self.logs.keys())))
 
     def process_command(self, command):
         """Perform actions based on the command."""
@@ -61,3 +45,20 @@ class Interface:
                 break
             else:
                 self.process_command(command)
+
+    def view(self, parameters):
+        """View the log, with parameters given by user."""
+        item = parameters[0]
+        if item not in self.logs:
+            self.logs[item] = self.create_item(item)
+        self.logs[item].get_entries()
+
+    def log(self, parameters):
+        """Add new entries to an item."""
+        item = parameters[0]
+        self.logs[item].add_entry()
+
+    def list(self):
+        """List logged items."""
+        print("Your items: " + ", ".join(list(self.logs.keys())))
+
