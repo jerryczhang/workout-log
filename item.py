@@ -5,14 +5,14 @@ from os import path
 class LoggedItem:
     """Represents one item to track data under."""
 
-    def __init__(self, name):
+    def __init__(self, name, columns=[]):
         """Initialize data table."""
         self.name = name
         self.directory = "logs/" + name + ".txt"
         if path.exists(self.directory):
-            self.data = pd.read_csv(self.directory)
+            self.data = pd.read_csv(self.directory, index_col=0)
         else:
-            self.data = pd.DataFrame()
+            self.data = pd.DataFrame(columns=columns)
 
     def add_entry(self, index=None):
         """Add an entry under the item."""
@@ -25,8 +25,14 @@ class LoggedItem:
             self.data = self.data.append(new_entry, ignore_index=True)
             self.get_entries()
             user_in = input(prompt)
+        self.data.to_csv(self.directory)
 
     def get_entries(self, indices=None):
         """Pull up entries corresponding to indices."""
         if indices == None:
             print(self.data)
+
+    def add_columns(self, columns):
+        """Add columns to the DataFrame."""
+        for column in columns:
+            a[column] = []
