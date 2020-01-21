@@ -3,6 +3,17 @@ import os
 
 class Interface:
 
+    def start(self):
+        """Start the interface, loops until user enters 'quit'."""
+        self.commands = ["list", "view", "log", "edit", "quit"]
+        self.load_logs()
+        while True:
+            command = self.get_command()
+            if command[0] == "quit":
+                break
+            else:
+                self.process_command(command)
+
     def load_logs(self):
         """Load in previously entered logs."""
         files = [f for f in os.listdir("logs/") if os.path.isfile(os.path.join("logs/", f))]
@@ -19,7 +30,7 @@ class Interface:
 
     def get_command(self):
         """Get a command from the user."""
-        prompt = "Enter command [list, view, log, quit]: "
+        prompt = "Enter command (" + ", ".join(self.commands) + "): "
         command = input(prompt).split()
         while command[0] not in self.commands:
             print("Invalid input entered: " + command[0])
@@ -34,17 +45,8 @@ class Interface:
             self.log(command[1:])
         if command[0] == "list":
             self.list()
-
-    def start(self):
-        """Start the interface, loops until user enters 'quit'."""
-        self.commands = ["list", "view", "log", "quit"]
-        self.load_logs()
-        while True:
-            command = self.get_command()
-            if command[0] == "quit":
-                break
-            else:
-                self.process_command(command)
+        if command[0] == "edit":
+            self.edit(command[1:])
 
     def view(self, parameters):
         """View the log, with parameters given by user."""
@@ -61,4 +63,11 @@ class Interface:
     def list(self):
         """List logged items."""
         print("Your items: " + ", ".join(list(self.logs.keys())))
+
+    def edit(self, parameters):
+        """Edit a previous entry."""
+        item = parameters[0]
+        index = parameters[1]
+        self.logs[item].edit_entry(index)
+        
 
