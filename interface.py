@@ -22,12 +22,6 @@ class Interface:
             name = item[:item.index('.')]
             self.logs[name] = LoggedItem(name)
 
-    def create_item(self, name):
-        """Create a new logged item."""
-        columns = input("Enter columns for new item: ").split()
-        new_item = LoggedItem(name, ["date"] + columns)
-        return new_item
-
     def get_command(self):
         """Get a command from the user."""
         prompt = "Enter command (" + ", ".join(self.commands) + "): "
@@ -53,7 +47,19 @@ class Interface:
         item = parameters[0]
         if item not in self.logs:
             self.logs[item] = self.create_item(item)
-        self.logs[item].get_entries()
+        if len(parameters) > 1:
+            col = parameters[1]
+            filter_op = parameters[2]
+            value = parameters[3]
+            self.logs[item].get_entries(col, filter_op, value)
+        else:
+            self.logs[item].get_entries()
+
+    def create_item(self, name):
+        """Create a new logged item."""
+        columns = input("Enter columns for new item: ").split()
+        new_item = LoggedItem(name, ["date"] + columns)
+        return new_item
 
     def log(self, parameters):
         """Add new entries to an item."""

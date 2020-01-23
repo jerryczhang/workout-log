@@ -16,6 +16,7 @@ class LoggedItem:
             self.data = pd.DataFrame(columns=columns)
 
     def to_integer(self, string):
+        """Convert a string to integer, first checking for numeric."""
         if string.isnumeric():
             return int(string)
         else:
@@ -35,10 +36,18 @@ class LoggedItem:
             user_in = input(prompt)
         self.data.to_csv(self.directory)
 
-    def get_entries(self, indices=None):
-        """Pull up entries corresponding to indices."""
-        if indices == None:
+    def get_entries(self, col=None, filter_op=None, value=None):
+        """Pull up entries corresponding to filter."""
+        if not col:
             print(self.data)
+        else:
+            if filter_op == "equals":
+                mask = self.data[col] == self.to_integer(value)
+            elif filter_op == "greater":
+                mask = self.data[col] >= self.to_integer(value)
+            elif filter_op == "less":
+                mask = self.data[col] <= self.to_integer(value)
+            print(self.data[mask])
 
     def add_columns(self, columns):
         """Add columns to the DataFrame."""
