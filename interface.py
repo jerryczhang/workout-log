@@ -49,8 +49,8 @@ class Interface:
             print(usage)
         else:
             item = parameters[0]
-            if item not in self.logs:
-                self.logs[item] = self.create_item(item)
+            if not self.check_item(item):
+                return
             if len(parameters) == 4:
                 col = parameters[1]
                 filter_op = parameters[2]
@@ -60,6 +60,20 @@ class Interface:
                 self.logs[item].get_entries()
             else:
                 print(usage)
+
+    def check_item(self, item):
+        """Check if the item is tracked, and add it."""
+        if item not in self.logs:
+            while True:
+                user_in = input('\t' + item + " does not exist. Would you like to create it? (y/n): ")
+                if user_in == 'y':
+                    self.logs[item] = self.create_item(item)
+                    return True
+                elif user_in != 'n':
+                    print("\tInvalid input entered: " + user_in)
+                else:
+                    return False
+        return True
 
     def create_item(self, name):
         """Create a new logged item."""
@@ -74,6 +88,8 @@ class Interface:
             print(usage)
         else:
             item = parameters[0]
+            if not self.check_item(item):
+                return
             self.logs[item].add_entry()
 
     def list(self):
