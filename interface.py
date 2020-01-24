@@ -27,7 +27,7 @@ class Interface:
         prompt = "Enter command (" + ", ".join(self.commands) + "): "
         command = input(prompt).split()
         while command[0] not in self.commands:
-            print("Invalid input entered: " + command[0])
+            print("\tInvalid input entered: " + command[0])
             command = input(prompt).split()
         return command
 
@@ -44,16 +44,22 @@ class Interface:
 
     def view(self, parameters):
         """View the log, with parameters given by user."""
-        item = parameters[0]
-        if item not in self.logs:
-            self.logs[item] = self.create_item(item)
-        if len(parameters) > 1:
-            col = parameters[1]
-            filter_op = parameters[2]
-            value = parameters[3]
-            self.logs[item].get_entries(col, filter_op, value)
+        usage = "\tUsage: view <item_name> [column] [filter_operation] [filter_value]"
+        if len(parameters) == 0:
+            print(usage)
         else:
-            self.logs[item].get_entries()
+            item = parameters[0]
+            if item not in self.logs:
+                self.logs[item] = self.create_item(item)
+            if len(parameters) == 4:
+                col = parameters[1]
+                filter_op = parameters[2]
+                value = parameters[3]
+                self.logs[item].get_entries(col, filter_op, value)
+            elif len(parameters) == 1:
+                self.logs[item].get_entries()
+            else:
+                print(usage)
 
     def create_item(self, name):
         """Create a new logged item."""
@@ -68,7 +74,7 @@ class Interface:
 
     def list(self):
         """List logged items."""
-        print("Your items: " + ", ".join(list(self.logs.keys())))
+        print("\tYour items: " + ", ".join(list(self.logs.keys())))
 
     def edit(self, parameters):
         """Edit a previous entry."""

@@ -38,16 +38,24 @@ class LoggedItem:
 
     def get_entries(self, col=None, filter_op=None, value=None):
         """Pull up entries corresponding to filter."""
+        failed = False
         if not col:
             print(self.data)
         else:
-            if filter_op == "equals":
-                mask = self.data[col] == self.to_integer(value)
-            elif filter_op == "greater":
-                mask = self.data[col] >= self.to_integer(value)
-            elif filter_op == "less":
-                mask = self.data[col] <= self.to_integer(value)
-            print(self.data[mask])
+            if col not in list(self.data.columns):
+                print("\tColumn \"" + col + "\" not found.")
+                failed = True
+            if filter_op not in ["equals", "greater", "less"]:
+                print("\tFilter operation \"" + filter_op + "\" not valid.")
+                failed = True
+            if not failed:
+                if filter_op == "equals":
+                    mask = self.data[col] == self.to_integer(value)
+                elif filter_op == "greater":
+                    mask = self.data[col] >= self.to_integer(value)
+                elif filter_op == "less":
+                    mask = self.data[col] <= self.to_integer(value)
+                print('\t' + self.data[mask])
 
     def add_columns(self, columns):
         """Add columns to the DataFrame."""
@@ -57,7 +65,7 @@ class LoggedItem:
     def edit_entry(self, index):
         """Edit an entry in the DatFrame."""
         columns = list(self.data.columns)
-        prompt = "Enter data for columns (" + ", ".join(columns) + "): "
+        prompt = "\nEnter data for columns (" + ", ".join(columns) + "): "
         user_in = input(prompt).split()
         user_in = list(map(self.to_integer, user_in))
         self.data.loc[int(index)] = user_in
