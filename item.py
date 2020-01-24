@@ -30,9 +30,12 @@ class LoggedItem:
         user_in = input(prompt)
         while user_in != "quit":
             data = today + list(map(self.to_integer, user_in.split()))
-            new_entry = pd.DataFrame([data], columns=columns)
-            self.data = self.data.append(new_entry, ignore_index=True)
-            self.get_entries()
+            if len(data) != len(columns):
+                print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data) - 1, len(columns) - 1))
+            else:
+                new_entry = pd.DataFrame([data], columns=columns)
+                self.data = self.data.append(new_entry, ignore_index=True)
+                self.get_entries()
             user_in = input(prompt)
         self.data.to_csv(self.directory)
 
@@ -55,7 +58,7 @@ class LoggedItem:
                     mask = self.data[col] >= self.to_integer(value)
                 elif filter_op == "less":
                     mask = self.data[col] <= self.to_integer(value)
-                print('\t' + self.data[mask])
+                print(self.data[mask])
 
     def add_columns(self, columns):
         """Add columns to the DataFrame."""

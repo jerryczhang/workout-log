@@ -69,8 +69,12 @@ class Interface:
 
     def log(self, parameters):
         """Add new entries to an item."""
-        item = parameters[0]
-        self.logs[item].add_entry()
+        usage = "\tUsage: log <item_name>"
+        if len(parameters) != 1:
+            print(usage)
+        else:
+            item = parameters[0]
+            self.logs[item].add_entry()
 
     def list(self):
         """List logged items."""
