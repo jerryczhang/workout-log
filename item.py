@@ -15,10 +15,14 @@ class LoggedItem:
         else:
             self.data = pd.DataFrame(columns=columns)
 
-    def to_integer(self, string):
-        """Convert a string to integer, first checking for numeric."""
+    def parse_input(self, string):
+        """Convert a string to the correct type."""
         if string.isnumeric():
             return int(string)
+        elif '/' in string:
+            in_date = string.split('/')
+            in_date = list(map(int, in_date))
+            return date(in_date[2], in_date[0], in_date[1])
         else:
             return string
 
@@ -29,7 +33,7 @@ class LoggedItem:
         prompt = "Enter data for columns (" + ", ".join(columns[1:]) + ") (Enter 'quit' when done): "
         user_in = input(prompt)
         while user_in != "quit":
-            data = today + list(map(self.to_integer, user_in.split()))
+            data = today + list(map(self.parse_input, user_in.split()))
             if len(data) != len(columns):
                 print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data) - 1, len(columns) - 1))
             else:
@@ -52,12 +56,14 @@ class LoggedItem:
                 print("\tFilter operation \"" + filter_op + "\" not valid.")
                 failed = True
             if not failed:
+                column = self.data[col].map(self.parse_input)
+                value = self.parse_input(value)
                 if filter_op == "equals":
-                    mask = self.data[col] == self.to_integer(value)
+                    mask = column == value
                 elif filter_op == "greater":
-                    mask = self.data[col] >= self.to_integer(value)
+                    mask = column > value
                 elif filter_op == "less":
-                    mask = self.data[col] <= self.to_integer(value)
+                    mask = column < value
                 print(self.data[mask])
 
     def add_columns(self, columns):
@@ -70,7 +76,7 @@ class LoggedItem:
         columns = list(self.data.columns)
         prompt = "\nEnter data for columns (" + ", ".join(columns) + "): "
         user_in = input(prompt).split()
-        user_in = list(map(self.to_integer, user_in))
+        user_in = list(map(self.parse_input, user_in))
         self.data.loc[int(index)] = user_in
         self.data.to_csv(self.directory)
 
