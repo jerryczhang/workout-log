@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import encode as e
 from os import path
 
 class LoggedItem:
@@ -29,8 +30,8 @@ class LoggedItem:
         if not col:
             print(self.data)
         else:
-            column = self.data[col].map(self.parse_data)
-            value = self.parse_data(value)
+            column = self.data[col].map(e.parse_data)
+            value = e.parse_data(value)
             if filter_op == "equals":
                 mask = column == value
             elif filter_op == "greater":

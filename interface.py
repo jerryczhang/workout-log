@@ -1,8 +1,10 @@
 from item import LoggedItem
 from datetime import date
+import encode as e
 import os
 
 class Interface:
+    """Processes input and output for the user."""
 
     def start(self):
         """Start the interface, loops until user enters 'quit'."""
@@ -15,47 +17,6 @@ class Interface:
             else:
                 self.process_command(command)
 
-    def parse_data(self, string):
-        """Convert a string from the table to the correct type."""
-        if string.isnumeric():
-            return int(string)
-        elif '/' in string:
-            return self.parse_date(string)
-        else:
-            return string
-
-    def parse_date(self, string):
-        """Convert a string input into a date object."""
-        today = date.today()
-        year = today.year
-        month = today.month
-        day = today.day
-        date_in = string.split('/')
-        try:
-            if len(date_in) == 2:
-                if date_in[1]:
-                    day = int(date_in[1])    
-                    month = int(date_in[0])
-                elif date_in[0]:
-                    day = int(date_in[0])
-            elif len(date_in) == 3:
-                month, day, year = list(map(int, date_in))
-            else:
-                print("\tInvalid date entered: " + string)
-                return "FAILED"
-            return date(year, month, day)
-        except ValueError:
-            print("\tInvalid date entered: " + string)
-            return "FAILED"
-
-    def encode_input(self, user_in):
-        """Convert user input to a string."""
-        user_in = self.parse_data(user_in)
-        if type(user_in) == date:
-            return user_in.strftime("%m/%d/%Y" )
-        else:
-            return str(user_in)
-
     def load_logs(self):
         """Load in previously entered logs."""
         files = [f for f in os.listdir("logs/") if os.path.isfile(os.path.join("logs/", f))]
@@ -63,15 +24,6 @@ class Interface:
         for item in files:
             name = item[:item.index('.')]
             self.logs[name] = LoggedItem(name)
-
-    def get_command(self):
-        """Get a command from the user."""
-        prompt = "Enter command (" + ", ".join(self.commands) + "): "
-        command = input(prompt).split()
-        while command[0] not in self.commands:
-            print("\tInvalid input entered: " + command[0])
-            command = input(prompt).split()
-        return command
 
     def process_command(self, command):
         """Perform actions based on the command."""
@@ -84,24 +36,14 @@ class Interface:
         if command[0] == "edit":
             self.edit(command[1:])
 
-    def view(self, parameters):
-        """View the log, with parameters given by user."""
-        usage = "\tUsage: view <item_name> [column] [filter_operation] [filter_value]"
-        if len(parameters) == 0:
-            print(usage)
-        else:
-            item = parameters[0]
-            if not self.check_item(item):
-                return
-            if len(parameters) == 4:
-                col = parameters[1]
-                filter_op = parameters[2]
-                value = parameters[3]
-                self.logs[item].get_entries(col, filter_op, value)
-            elif len(parameters) == 1:
-                self.logs[item].get_entries()
-            else:
-                print(usage)
+    def get_command(self):
+        """Get a command from the user."""
+        prompt = "Enter command (" + ", ".join(self.commands) + "): "
+        command = input(prompt).split()
+        while command[0] not in self.commands:
+            print("\tInvalid command entered: " + command[0])
+            command = input(prompt).split()
+        return command
 
     def check_item(self, item):
         """Check if the item is tracked, and add it."""
@@ -123,6 +65,25 @@ class Interface:
         new_item = LoggedItem(name, ["date"] + columns)
         return new_item
 
+    def view(self, parameters):
+        """View the log, with parameters given by user."""
+        usage = "\tUsage: view <item_name> [column] [filter_operation] [filter_value]"
+        if len(parameters) == 0:
+            print(usage)
+        else:
+            item = parameters[0]
+            if not self.check_item(item):
+                return
+            if len(parameters) == 4:
+                col = parameters[1]
+                filter_op = parameters[2]
+                value = parameters[3]
+                self.logs[item].get_entries(col, filter_op, value)
+            elif len(parameters) == 1:
+                self.logs[item].get_entries()
+            else:
+                print(usage)
+
     def log(self, parameters):
         """Add new entries to an item."""
         usage = "\tUsage: log <item_name>"
@@ -138,10 +99,8 @@ class Interface:
             prompt = "Enter data for columns (" + ", ".join(columns) + ") (Enter 'quit' when done): "
             user_in = input(prompt)
             while user_in != "quit":
-                data = list(map(self.encode_input, user_in.split()))
-                if "FAILED" in data:
-                    pass
-                elif len(data) != len(columns):
+                data = list(map(e.encode_input, user_in.split()))
+                if len(data) != len(columns):
                     print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data), len(columns)))
                 else:
                     item.append(data)
@@ -158,7 +117,7 @@ class Interface:
         columns = item.get_columns()
         prompt = "\nEnter data for columns (" + ", ".join(columns) + "): "
         user_in = input(prompt).split()
-        user_in = list(map(self.encode_input, user_in))
+        user_in = list(map(e.encode_input, user_in))
         item.edit_entry(index, user_in)
         
 
