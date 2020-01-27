@@ -1,4 +1,5 @@
 from item import LoggedItem
+from datetime import date
 import os
 
 class Interface:
@@ -13,6 +14,47 @@ class Interface:
                 break
             else:
                 self.process_command(command)
+
+    def parse_data(self, string):
+        """Convert a string from the table to the correct type."""
+        if string.isnumeric():
+            return int(string)
+        elif '/' in string:
+            return self.parse_date(string)
+        else:
+            return string
+
+    def parse_date(self, string):
+        """Convert a string input into a date object."""
+        today = date.today()
+        year = today.year
+        month = today.month
+        day = today.day
+        date_in = string.split('/')
+        try:
+            if len(date_in) == 2:
+                if date_in[1]:
+                    day = int(date_in[1])    
+                    month = int(date_in[0])
+                elif date_in[0]:
+                    day = int(date_in[0])
+            elif len(date_in) == 3:
+                month, day, year = list(map(int, date_in))
+            else:
+                print("\tInvalid date entered: " + string)
+                return "FAILED"
+            return date(year, month, day)
+        except ValueError:
+            print("\tInvalid date entered: " + string)
+            return "FAILED"
+
+    def encode_input(self, user_in):
+        """Convert user input to a string."""
+        user_in = self.parse_data(user_in)
+        if type(user_in) == date:
+            return user_in.strftime("%m/%d/%Y" )
+        else:
+            return str(user_in)
 
     def load_logs(self):
         """Load in previously entered logs."""
@@ -86,11 +128,24 @@ class Interface:
         usage = "\tUsage: log <item_name>"
         if len(parameters) != 1:
             print(usage)
+            return
         else:
             item = parameters[0]
             if not self.check_item(item):
                 return
-            self.logs[item].add_entry()
+            item = self.logs[item]
+            columns = item.get_columns()
+            prompt = "Enter data for columns (" + ", ".join(columns) + ") (Enter 'quit' when done): "
+            user_in = input(prompt)
+            while user_in != "quit":
+                data = list(map(self.encode_input, user_in.split()))
+                if "FAILED" in data:
+                    pass
+                elif len(data) != len(columns):
+                    print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data), len(columns)))
+                else:
+                    item.append(data)
+                user_in = input(prompt)
 
     def list(self):
         """List logged items."""
@@ -98,8 +153,12 @@ class Interface:
 
     def edit(self, parameters):
         """Edit a previous entry."""
-        item = parameters[0]
+        item = self.logs[parameters[0]]
         index = parameters[1]
-        self.logs[item].edit_entry(index)
+        columns = item.get_columns()
+        prompt = "\nEnter data for columns (" + ", ".join(columns) + "): "
+        user_in = input(prompt).split()
+        user_in = list(map(self.encode_input, user_in))
+        item.edit_entry(index, user_in)
         
 
