@@ -15,27 +15,58 @@ class LoggedItem:
         else:
             self.data = pd.DataFrame(columns=columns)
 
-    def parse_input(self, string):
+    def parse_data(self, string):
         """Convert a string to the correct type."""
         if string.isnumeric():
             return int(string)
         elif '/' in string:
-            in_date = string.split('/')
-            in_date = list(map(int, in_date))
-            return date(in_date[2], in_date[0], in_date[1])
+            return self.parse_date(string)
         else:
             return string
+
+    def parse_date(self, string):
+        """Convert a string input into a date object."""
+        today = date.today()
+        year = today.year
+        month = today.month
+        day = today.day
+        date_in = string.split('/')
+        try:
+            if len(date_in) == 2:
+                if date_in[1]:
+                    day = int(date_in[1])    
+                    month = int(date_in[0])
+                elif date_in[0]:
+                    day = int(date_in[0])
+            elif len(date_in) == 3:
+                month, day, year = list(map(int, date_in))
+            else:
+                print("\tInvalid date entered: " + string)
+                return "FAILED"
+            return date(year, month, day)
+        except ValueError:
+            print("\tInvalid date entered: " + string)
+            return "FAILED"
+
+    def convert_input(self, user_in):
+        """Convert user input to a string."""
+        user_in = self.parse_data(user_in)
+        if type(user_in) == date:
+            return user_in.strftime("%m/%d/%Y" )
+        else:
+            return str(user_in)
 
     def add_entry(self, index=None):
         """Add an entry under the item."""
         columns = list(self.data.columns)
-        today = [date.today().strftime("%m/%d/%Y")]
-        prompt = "Enter data for columns (" + ", ".join(columns[1:]) + ") (Enter 'quit' when done): "
+        prompt = "Enter data for columns (" + ", ".join(columns) + ") (Enter 'quit' when done): "
         user_in = input(prompt)
         while user_in != "quit":
-            data = today + list(map(self.parse_input, user_in.split()))
-            if len(data) != len(columns):
-                print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data) - 1, len(columns) - 1))
+            data = list(map(self.convert_input, user_in.split()))
+            if "FAILED" in data:
+                pass
+            elif len(data) != len(columns):
+                print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data), len(columns)))
             else:
                 new_entry = pd.DataFrame([data], columns=columns)
                 self.data = self.data.append(new_entry, ignore_index=True)
@@ -56,8 +87,8 @@ class LoggedItem:
                 print("\tFilter operation \"" + filter_op + "\" not valid.")
                 failed = True
             if not failed:
-                column = self.data[col].map(self.parse_input)
-                value = self.parse_input(value)
+                column = self.data[col].map(self.parse_data)
+                value = self.parse_data(value)
                 if filter_op == "equals":
                     mask = column == value
                 elif filter_op == "greater":
@@ -76,7 +107,7 @@ class LoggedItem:
         columns = list(self.data.columns)
         prompt = "\nEnter data for columns (" + ", ".join(columns) + "): "
         user_in = input(prompt).split()
-        user_in = list(map(self.parse_input, user_in))
+        user_in = list(map(self.convert_input, user_in))
         self.data.loc[int(index)] = user_in
         self.data.to_csv(self.directory)
 
