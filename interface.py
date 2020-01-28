@@ -1,7 +1,24 @@
 from item import LoggedItem
 from datetime import date
-import encode as e
+import encode as en
 import os
+
+class Status:
+    """Returned by a command to indicate success or failure."""
+
+    def __init__(self, successful, message=""):
+        """Initialize this return's success bool and message."""
+        self.successful = successful
+        self.message = message
+
+    def print_message(self):
+        """Print this return's message."""
+        if self.message:
+            print(message)
+
+    def failed(self):
+        """Get whether the command failed."""
+        return not self.successful
 
 class Interface:
     """Processes input and output for the user."""
@@ -28,13 +45,15 @@ class Interface:
     def process_command(self, command):
         """Perform actions based on the command."""
         if command[0] == "view":
-            self.view(command[1:])
+            execute = self.view(command[1:])
         if command[0] == "log":
-            self.log(command[1:])
+            execute = self.log(command[1:])
         if command[0] == "list":
-            self.list()
+            execute = self.list()
         if command[0] == "edit":
-            self.edit(command[1:])
+            execute = self.edit(command[1:])
+        if execute.failed():
+            execute.print_message()
 
     def get_command(self):
         """Get a command from the user."""
@@ -78,56 +97,60 @@ class Interface:
         """View the log, with parameters given by user."""
         usage = "\tUsage: view <item_name> [column] [filter_operation] [filter_value]"
         if not self.check_num_params(parameters, 1, 4, usage):
-            return
+            return Status(False)
         item = parameters[0]
         if not self.check_item(item):
-            return
+            return Status(False)
+        logged_item = self.logs[item]
         if len(parameters) == 4:
             col = parameters[1]
             filter_op = parameters[2]
             value = parameters[3]
-            self.logs[item].get_entries(col, filter_op, value)
+            logged_item.get_entries(col, filter_op, value)
+            return Status(True)
         elif len(parameters) == 1:
-            self.logs[item].get_entries()
-        else:
-            print(usage)
+            logged_item.get_entries()
+            return Status(True)
 
     def log(self, parameters):
         """Add new entries to an item."""
         usage = "\tUsage: log <item_name>"
         if not self.check_num_params(parameters, 1, 1, usage):
-            return
+            return Status(False)
         else:
             item = parameters[0]
             if not self.check_item(item):
-                return
+                return Status(False)
             item = self.logs[item]
             columns = item.get_columns()
             prompt = "Enter data for columns (" + ", ".join(columns) + ") (Enter 'quit' when done): "
             user_in = input(prompt)
             while user_in != "quit":
-                data = list(map(e.encode_input, user_in.split()))
+                data = list(map(en.encode_input, user_in.split()))
                 if len(data) != len(columns):
                     print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data), len(columns)))
                 else:
                     item.append(data)
                 user_in = input(prompt)
+            return Status(True)
 
     def list(self):
         """List logged items."""
         print("\tYour items: " + ", ".join(list(self.logs.keys())))
+        return Status(True)
 
     def edit(self, parameters):
         """Edit a previous entry."""
         usage = "\tUsage: edit <item_name> <entry_number>"
         if not self.check_num_params(parameters, 2, 2, usage):
-            return
+            return Status(False)
         item = self.logs[parameters[0]]
         index = parameters[1]
         columns = item.get_columns()
         prompt = "\nEnter data for columns (" + ", ".join(columns) + "): "
         user_in = input(prompt).split()
-        user_in = list(map(e.encode_input, user_in))
+        user_in = list(map(en.encode_input, user_in))
         item.edit_entry(index, user_in)
+        return Status(True)
         
 
