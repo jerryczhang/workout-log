@@ -65,30 +65,37 @@ class Interface:
         new_item = LoggedItem(name, ["date"] + columns)
         return new_item
 
+    def check_num_params(self, params, lower, upper, msg):
+        """Checks if len of params is within bounds."""
+        is_within = lower <= len(params) <= upper
+        if is_within:
+            return True
+        else:
+            print(msg)
+            return False
+
     def view(self, parameters):
         """View the log, with parameters given by user."""
         usage = "\tUsage: view <item_name> [column] [filter_operation] [filter_value]"
-        if len(parameters) == 0:
-            print(usage)
+        if not self.check_num_params(parameters, 1, 4, usage):
+            return
+        item = parameters[0]
+        if not self.check_item(item):
+            return
+        if len(parameters) == 4:
+            col = parameters[1]
+            filter_op = parameters[2]
+            value = parameters[3]
+            self.logs[item].get_entries(col, filter_op, value)
+        elif len(parameters) == 1:
+            self.logs[item].get_entries()
         else:
-            item = parameters[0]
-            if not self.check_item(item):
-                return
-            if len(parameters) == 4:
-                col = parameters[1]
-                filter_op = parameters[2]
-                value = parameters[3]
-                self.logs[item].get_entries(col, filter_op, value)
-            elif len(parameters) == 1:
-                self.logs[item].get_entries()
-            else:
-                print(usage)
+            print(usage)
 
     def log(self, parameters):
         """Add new entries to an item."""
         usage = "\tUsage: log <item_name>"
-        if len(parameters) != 1:
-            print(usage)
+        if not self.check_num_params(parameters, 1, 1, usage):
             return
         else:
             item = parameters[0]
@@ -112,6 +119,9 @@ class Interface:
 
     def edit(self, parameters):
         """Edit a previous entry."""
+        usage = "\tUsage: edit <item_name> <entry_number>"
+        if not self.check_num_params(parameters, 2, 2, usage):
+            return
         item = self.logs[parameters[0]]
         index = parameters[1]
         columns = item.get_columns()
