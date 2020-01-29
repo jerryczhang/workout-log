@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import encode as en
+import return_code as r
 from os import path
 
 class LoggedItem:
@@ -27,18 +28,30 @@ class LoggedItem:
 
     def get_entries(self, col=None, filter_op=None, value=None):
         """Pull up entries corresponding to filter."""
-        if not col:
+        filters = {
+                "=" : lambda c, v : c == v,
+                ">" : lambda c, v : c > v,
+                "<" : lambda c, v : c < v,
+                ">=" : lambda c, v : c >= v,
+                "<=" : lambda c, v : c <= v,
+        }
+        if col is None:
             print(self.data)
+            return r.Status(True)
         else:
+            if col not in self.get_columns():
+                return r.Status(False, "\tColumn \"" + col + "\" not found")
+            if filter_op not in filters:
+                return r.Status(False, "\tFilter operation \"" + filter_op + "\" invalid")
             column = self.data[col].map(en.parse_data)
             value = en.parse_data(value)
-            if filter_op == "equals":
-                mask = column == value
-            elif filter_op == "greater":
-                mask = column > value
-            elif filter_op == "less":
-                mask = column < value
+            if type(column) is r.Status:
+                return column
+            if type(value) is r.Status:
+                return value
+            mask = filters[filter_op](column, value)
             print(self.data[mask])
+            return r.Status(True)
 
     def add_columns(self, columns):
         """Add columns to the DataFrame."""

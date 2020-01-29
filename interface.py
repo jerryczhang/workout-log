@@ -1,24 +1,8 @@
 from item import LoggedItem
 from datetime import date
 import encode as en
+import return_code as r
 import os
-
-class Status:
-    """Returned by a command to indicate success or failure."""
-
-    def __init__(self, successful, message=""):
-        """Initialize this return's success bool and message."""
-        self.successful = successful
-        self.message = message
-
-    def print_message(self):
-        """Print this return's message."""
-        if self.message:
-            print(message)
-
-    def failed(self):
-        """Get whether the command failed."""
-        return not self.successful
 
 class Interface:
     """Processes input and output for the user."""
@@ -84,9 +68,9 @@ class Interface:
         new_item = LoggedItem(name, ["date"] + columns)
         return new_item
 
-    def check_num_params(self, params, lower, upper, msg):
+    def check_num_params(self, params, valid_nums, msg):
         """Checks if len of params is within bounds."""
-        is_within = lower <= len(params) <= upper
+        is_within = len(params) in valid_nums
         if is_within:
             return True
         else:
@@ -95,32 +79,30 @@ class Interface:
 
     def view(self, parameters):
         """View the log, with parameters given by user."""
-        usage = "\tUsage: view <item_name> [column] [filter_operation] [filter_value]"
-        if not self.check_num_params(parameters, 1, 4, usage):
-            return Status(False)
+        usage = "\tUsage: view <item_name> [column] {filter_operation} {filter_value}"
+        if not self.check_num_params(parameters, [1, 4], usage):
+            return r.Status(False)
         item = parameters[0]
         if not self.check_item(item):
-            return Status(False)
+            return r.Status(False)
         logged_item = self.logs[item]
         if len(parameters) == 4:
             col = parameters[1]
             filter_op = parameters[2]
             value = parameters[3]
-            logged_item.get_entries(col, filter_op, value)
-            return Status(True)
+            return logged_item.get_entries(col, filter_op, value)
         elif len(parameters) == 1:
-            logged_item.get_entries()
-            return Status(True)
+            return logged_item.get_entries()
 
     def log(self, parameters):
         """Add new entries to an item."""
         usage = "\tUsage: log <item_name>"
-        if not self.check_num_params(parameters, 1, 1, usage):
-            return Status(False)
+        if not self.check_num_params(parameters, [1], usage):
+            return r.Status(False)
         else:
             item = parameters[0]
             if not self.check_item(item):
-                return Status(False)
+                return r.Status(False)
             item = self.logs[item]
             columns = item.get_columns()
             prompt = "Enter data for columns (" + ", ".join(columns) + ") (Enter 'quit' when done): "
@@ -132,18 +114,18 @@ class Interface:
                 else:
                     item.append(data)
                 user_in = input(prompt)
-            return Status(True)
+            return r.Status(True)
 
     def list(self):
         """List logged items."""
         print("\tYour items: " + ", ".join(list(self.logs.keys())))
-        return Status(True)
+        return r.Status(True)
 
     def edit(self, parameters):
         """Edit a previous entry."""
         usage = "\tUsage: edit <item_name> <entry_number>"
-        if not self.check_num_params(parameters, 2, 2, usage):
-            return Status(False)
+        if not self.check_num_params(parameters, [2], usage):
+            return r.Status(False)
         item = self.logs[parameters[0]]
         index = parameters[1]
         columns = item.get_columns()
@@ -151,6 +133,6 @@ class Interface:
         user_in = input(prompt).split()
         user_in = list(map(en.encode_input, user_in))
         item.edit_entry(index, user_in)
-        return Status(True)
+        return r.Status(True)
         
 

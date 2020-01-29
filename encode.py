@@ -1,4 +1,5 @@
 from datetime import date
+import return_code as r
 
 def parse_data(string):
     """Convert a string from the table to the correct type."""
@@ -16,15 +17,18 @@ def parse_date(string):
     month = today.month
     day = today.day
     date_in = string.split('/')
-    if len(date_in) == 2:
-        if date_in[1]:
-            day = int(date_in[1])    
-            month = int(date_in[0])
-        elif date_in[0]:
-            day = int(date_in[0])
-    elif len(date_in) == 3:
-        month, day, year = list(map(int, date_in))
-    return date(year, month, day)
+    try:
+        if len(date_in) == 2:
+            if date_in[1]:
+                day = int(date_in[1])    
+                month = int(date_in[0])
+            elif date_in[0]:
+                day = int(date_in[0])
+        elif len(date_in) == 3:
+            month, day, year = list(map(int, date_in))
+        return date(year, month, day)
+    except ValueError:
+        return r.Status(False, "\tInvalid date entered: " + string)
 
 def encode_input(user_in):
     """Convert user input to a string."""
