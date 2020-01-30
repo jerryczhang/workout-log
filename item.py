@@ -40,16 +40,19 @@ class LoggedItem:
             return r.Status(True)
         else:
             if col not in self.get_columns():
-                return r.Status(False, "\tColumn \"" + col + "\" not found")
+                return r.Status(False, "\tColumn \"" + col + "\" not found\n\tValid columns: " + ", ".join(self.get_columns()))
             if filter_op not in filters:
-                return r.Status(False, "\tFilter operation \"" + filter_op + "\" invalid")
+                return r.Status(False, "\tFilter operation \"" + filter_op + "\" invalid\n\tValid operations: " + ", ".join(filters.keys()))
             column = self.data[col].map(en.parse_data)
             value = en.parse_data(value)
             if type(column) is r.Status:
                 return column
             if type(value) is r.Status:
                 return value
-            mask = filters[filter_op](column, value)
+            try:
+                mask = filters[filter_op](column, value)
+            except TypeError:
+                return r.Status(False, "\tInvalid type entered (%s) for column type (%s)" % (type(value), type(column[0])))
             print(self.data[mask])
             return r.Status(True)
 

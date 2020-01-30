@@ -79,7 +79,7 @@ class Interface:
 
     def view(self, parameters):
         """View the log, with parameters given by user."""
-        usage = "\tUsage: view <item_name> [column] {filter_operation} {filter_value}"
+        usage = "\tUsage: view <item_name> [filter_column] [filter_operation] [filter_value]"
         if not self.check_num_params(parameters, [1, 4], usage):
             return r.Status(False)
         item = parameters[0]
