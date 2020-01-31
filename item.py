@@ -65,4 +65,5 @@ class LoggedItem:
         """Edit an entry in the DatFrame."""
         self.data.loc[int(index)] = data
         self.data.to_csv(self.directory)
+        return r.Status(True)
 

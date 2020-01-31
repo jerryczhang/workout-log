@@ -65,7 +65,7 @@ class Interface:
     def create_item(self, name):
         """Create a new logged item."""
         columns = input("Enter columns for new item: ").split()
-        new_item = LoggedItem(name, ["date"] + columns)
+        new_item = LoggedItem(name, columns)
         return new_item
 
     def check_num_params(self, params, valid_nums, msg):
@@ -132,7 +132,8 @@ class Interface:
         prompt = "\nEnter data for columns (" + ", ".join(columns) + "): "
         user_in = input(prompt).split()
         user_in = list(map(en.encode_input, user_in))
-        item.edit_entry(index, user_in)
-        return r.Status(True)
-        
+        for entry in user_in:
+            if type(entry) == r.Status:
+                return entry
+        return item.edit_entry(index, user_in)
 

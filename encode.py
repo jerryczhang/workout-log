@@ -35,6 +35,8 @@ def encode_input(user_in):
     user_in = parse_data(user_in)
     if type(user_in) == date:
         return user_in.strftime("%m/%d/%Y" )
+    elif type(user_in) == r.Status:
+        return user_in
     else:
         return str(user_in)
 
