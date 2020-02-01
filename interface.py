@@ -9,7 +9,14 @@ class Interface:
 
     def start(self):
         """Start the interface, loops until user enters 'quit'."""
-        self.commands = ["list", "view", "log", "edit", "quit"]
+        self.commands = {
+                "quit": None,
+                "list": self.list,
+                "view": self.view,
+                "log":  self.log,
+                "edit": self.edit,
+                "delete": self.delete,
+        }                 
         self.load_logs()
         while True:
             command = self.get_command()
@@ -28,20 +35,15 @@ class Interface:
 
     def process_command(self, command):
         """Perform actions based on the command."""
-        if command[0] == "view":
-            execute = self.view(command[1:])
-        if command[0] == "log":
-            execute = self.log(command[1:])
-        if command[0] == "list":
-            execute = self.list()
-        if command[0] == "edit":
-            execute = self.edit(command[1:])
+        keyword = command[0]
+        parameters = command[1:]
+        execute = self.commands[keyword](parameters)
         if execute.failed():
             execute.print_message()
 
     def get_command(self):
         """Get a command from the user."""
-        prompt = "Enter command (" + ", ".join(self.commands) + "): "
+        prompt = "Enter command (" + ", ".join(self.commands.keys()) + "): "
         command = input(prompt).split()
         while command[0] not in self.commands:
             print("\tInvalid command entered: " + command[0])
@@ -116,7 +118,7 @@ class Interface:
                 user_in = input(prompt)
             return r.Status(True)
 
-    def list(self):
+    def list(self, parameters):
         """List logged items."""
         print("\tYour items: " + ", ".join(list(self.logs.keys())))
         return r.Status(True)
@@ -137,3 +139,11 @@ class Interface:
                 return entry
         return item.edit_entry(index, user_in)
 
+    def delete(self, parameters):
+        """Delete an entry from the table."""
+        usage = "\tUsage: delete <item_name> <entry_number>"
+        if not self.check_num_params(parameters, [2], usage):
+            return r.Status(False)
+        item = self.logs[parameters[0]]
+        index = parameters[1]
+        return item.delete_entry(int(index))

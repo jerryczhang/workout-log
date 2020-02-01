@@ -62,8 +62,14 @@ class LoggedItem:
             a[column] = []
 
     def edit_entry(self, index, data):
-        """Edit an entry in the DatFrame."""
+        """Edit an entry in the DataFrame."""
         self.data.loc[int(index)] = data
         self.data.to_csv(self.directory)
         return r.Status(True)
 
+    def delete_entry(self, index):
+        """Delete an entry in the DataFrame."""
+        if index not in self.data.index:
+            return r.Status(False, "\tEntry number " + str(index) + " does not exist")
+        self.data = self.data.drop(index)
+        return r.Status(True)
