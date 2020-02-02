@@ -12,7 +12,7 @@ class LoggedItem:
         self.name = name
         self.directory = "logs/" + name + ".txt"
         if path.exists(self.directory):
-            self.data = pd.read_csv(self.directory, index_col=0)
+            self.data = pd.read_csv(self.directory, index_col=0, dtype=str)
         else:
             self.data = pd.DataFrame(columns=columns)
 
@@ -26,7 +26,7 @@ class LoggedItem:
         self.data = self.data.append(data, ignore_index=True)
         self.data.to_csv(self.directory)
 
-    def get_entries(self, col=None, filter_op=None, value=None):
+    def get_entries(self, filter_col=None, filter_op=None, value=None, col=None):
         """Pull up entries corresponding to filter."""
         filters = {
                 "=" : lambda c, v : c == v,
@@ -35,15 +35,13 @@ class LoggedItem:
                 ">=" : lambda c, v : c >= v,
                 "<=" : lambda c, v : c <= v,
         }
-        if col is None:
-            print(self.data)
-            return r.Status(True)
-        else:
-            if col not in self.get_columns():
-                return r.Status(False, "\tColumn \"" + col + "\" not found\n\tValid columns: " + ", ".join(self.get_columns()))
+        mask = None
+        if filter_col is not None:
+            if filter_col not in self.get_columns():
+                return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (col, ", ".join(self.get_columns())))
             if filter_op not in filters:
                 return r.Status(False, "\tFilter operation \"" + filter_op + "\" invalid\n\tValid operations: " + ", ".join(filters.keys()))
-            column = self.data[col].map(en.parse_data)
+            column = self.data[filter_col].map(en.parse_data)
             value = en.parse_data(value)
             if type(column) is r.Status:
                 return column
@@ -53,8 +51,19 @@ class LoggedItem:
                 mask = filters[filter_op](column, value)
             except TypeError:
                 return r.Status(False, "\tInvalid type entered (%s) for column type (%s)" % (type(value), type(column[0])))
+        if col:
+            if col not in self.get_columns():
+                return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (col, ", ".join(self.get_columns())))
+    
+        if mask is not None and col:
+            print(self.data[col][mask])
+        elif mask is not None:
             print(self.data[mask])
-            return r.Status(True)
+        elif col:
+            print(self.data[col])
+        else:
+            print(self.data)
+        return r.Status(True)
 
     def add_columns(self, columns):
         """Add columns to the DataFrame."""
