@@ -25,6 +25,25 @@ class LoggedItem:
         data = pd.DataFrame([data], columns=self.get_columns())
         self.data = self.data.append(data, ignore_index=True)
         self.data.to_csv(self.directory)
+        return r.Status(True)
+
+    def insert(self, data, index):
+        """Insert a new entry at index."""
+        dataf = pd.DataFrame([data], columns=self.get_columns())
+        if not index.isnumeric():
+            return r.Status(False, "\tIndex must be an integer")
+        index = int(index)
+        max_index = list(self.data.index)[-1]
+        if index < 0:
+            return r.Status(False, "\tIndex must be at least 0")
+        elif index > max_index:
+            return self.append(data)
+        else:
+            data_a = self.data.iloc[:index]
+            data_b = self.data.iloc[index:]
+            self.data = data_a.append(dataf).append(data_b).reset_index(drop=True)
+            self.data.to_csv(self.directory)
+            return r.Status(True)
 
     def get_entries(self, filter_col=None, filter_op=None, value=None, col=None):
         """Pull up entries corresponding to filter."""

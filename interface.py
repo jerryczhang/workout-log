@@ -102,16 +102,22 @@ class Interface:
 
     def log(self, parameters):
         """Add new entries to an item."""
-        usage = "\tUsage: log <item_name>"
-        if not self.check_num_params(parameters, [1], usage):
+        usage = "\tUsage: log <item_name> [insert_index]"
+        if not self.check_num_params(parameters, [1, 2], usage):
             return r.Status(False)
-        else:
-            item = parameters[0]
-            if not self.check_item(item):
-                return r.Status(False)
-            item = self.logs[item]
-            columns = item.get_columns()
-            prompt = "Enter data for columns (" + ", ".join(columns) + ") (Enter 'quit' when done): "
+        item = parameters[0]
+        if not self.check_item(item):
+            return r.Status(False)
+        item = self.logs[item]
+        columns = item.get_columns()
+        if len(parameters) == 2:
+            prompt = "Enter data for columns (%s): " % ", ".join(columns)
+            user_in = input(prompt)
+            data = list(map(en.encode_input, user_in.split()))
+            index = parameters[1]
+            return item.insert(data, index)
+        elif len(parameters) == 1:
+            prompt = "Enter data for columns (%s) (Enter 'quit' when done): " % ", ".join(columns)
             user_in = input(prompt)
             while user_in != "quit":
                 data = list(map(en.encode_input, user_in.split()))
