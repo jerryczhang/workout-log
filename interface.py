@@ -124,9 +124,11 @@ class Interface:
                 if len(data) != len(columns):
                     print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data), len(columns)))
                 else:
-                    item.append(data)
+                    run = item.append(data)
+                    if run.failed():
+                        return run
                 user_in = input(prompt)
-            return r.Status(True)
+            return run
 
     def list(self, parameters):
         """List logged items."""

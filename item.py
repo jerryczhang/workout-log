@@ -20,9 +20,22 @@ class LoggedItem:
         """Return the columns of this item."""
         return list(self.data.columns)
     
+    def checktype(self, vals):
+        """Check if the types of incoming data are compatible."""
+        item_parsed = list(map(en.parse_data, self.data.loc[0]))
+        item_types = list(map(type, item_parsed))
+        vals_parsed = list(map(en.parse_data, vals.loc[0]))
+        vals_types = list(map(type, vals_parsed))
+        for index in range(len(item_types)):
+            if item_types[index] != vals_types[index]:
+                return False
+        return True
+
     def append(self, data):
         """Append a new entry."""
         data = pd.DataFrame([data], columns=self.get_columns())
+        if not self.checktype(data):
+            return r.Status(False, "\tInvalid type entered")
         self.data = self.data.append(data, ignore_index=True)
         self.data.to_csv(self.directory)
         return r.Status(True)
