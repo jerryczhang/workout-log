@@ -28,14 +28,15 @@ class LoggedItem:
         vals_types = list(map(type, vals_parsed))
         for index in range(len(item_types)):
             if item_types[index] != vals_types[index]:
-                return False
-        return True
+                return index
+        return -1
 
     def append(self, data):
         """Append a new entry."""
         data = pd.DataFrame([data], columns=self.get_columns())
-        if not self.checktype(data):
-            return r.Status(False, "\tInvalid type entered")
+        col_index = self.checktype(data)
+        if col_index != -1:
+            return r.Status(False, "\tInvalid type entered for column \"%s\"" % self.get_columns()[col_index])
         self.data = self.data.append(data, ignore_index=True)
         self.data.to_csv(self.directory)
         return r.Status(True)
@@ -43,6 +44,9 @@ class LoggedItem:
     def insert(self, data, index):
         """Insert a new entry at index."""
         dataf = pd.DataFrame([data], columns=self.get_columns())
+        col_index = self.checktype(dataf)
+        if col_index != -1:
+            return r.Status(False, "\tInvalid type entered for column \"%s\"" % self.get_columns()[col_index])
         if not index.isnumeric():
             return r.Status(False, "\tIndex must be an integer")
         index = int(index)
@@ -104,6 +108,10 @@ class LoggedItem:
 
     def edit_entry(self, index, data):
         """Edit an entry in the DataFrame."""
+        dataf = pd.DataFrame([data], columns=self.get_columns())
+        col_index = self.checktype(dataf)
+        if col_index != -1:
+            return r.Status(False, "\tInvalid type entered for column \"%s\"" % self.get_columns()[col_index])
         self.data.loc[int(index)] = data
         self.data.to_csv(self.directory)
         return r.Status(True)
