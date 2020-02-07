@@ -22,6 +22,8 @@ class LoggedItem:
     
     def checktype(self, vals):
         """Check if the types of incoming data are compatible."""
+        if len(self.data) == 0:
+            return -1
         item_parsed = list(map(en.parse_data, self.data.loc[0]))
         item_types = list(map(type, item_parsed))
         vals_parsed = list(map(en.parse_data, vals.loc[0]))
