@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import encode as en
 import return_code as r
 from os import path
@@ -123,4 +124,12 @@ class LoggedItem:
         if index not in self.data.index:
             return r.Status(False, "\tEntry number " + str(index) + " does not exist")
         self.data = self.data.drop(index)
+        return r.Status(True)
+
+    def graph(self, x_col):
+        """Graph the data wrt to x_col."""
+        data = [list(map(en.parse_data, self.data[col])) for col in self.get_columns()]
+        for col in data[1:]:
+            plt.plot(col)
+        plt.show()
         return r.Status(True)

@@ -16,6 +16,7 @@ class Interface:
                 "log":  self.log,
                 "edit": self.edit,
                 "delete": self.delete,
+                "graph": self.graph,
         }                 
         self.load_logs()
         while True:
@@ -159,3 +160,12 @@ class Interface:
         item = self.logs[parameters[0]]
         index = parameters[1]
         return item.delete_entry(int(index))
+
+    def graph(self, parameters):
+        """Graph an item."""
+        usage = "\tUsage: graph <item_name> <x_column>"
+        if not self.check_num_params(parameters, [2], usage):
+            return r.Status(False)
+        item = self.logs[parameters[0]]
+        x_col = parameters[1]
+        return item.graph(x_col)
