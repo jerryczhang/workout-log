@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import encode as en
 import return_code as r
+from datetime import date
 from os import path
 
 class LoggedItem:
@@ -128,8 +129,9 @@ class LoggedItem:
 
     def graph(self, x_col):
         """Graph the data wrt to x_col."""
-        data = [list(map(en.parse_data, self.data[col])) for col in self.get_columns()]
-        for col in data[1:]:
-            plt.plot(col)
+        data = [list(map(en.parse_data, self.data[col])) for col in self.get_columns() if col != x_col]
+        for idx in range(len(data)):
+            plt.plot(data[idx], label=self.get_columns()[idx])
+        plt.legend()
         plt.show()
         return r.Status(True)
