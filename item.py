@@ -3,8 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import encode as en
 import return_code as r
+from matplotlib.dates import date2num
 from datetime import date
 from os import path
+
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 
 class LoggedItem:
     """Represents one item to track data under."""
@@ -129,9 +133,16 @@ class LoggedItem:
 
     def graph(self, x_col):
         """Graph the data wrt to x_col."""
-        data = [list(map(en.parse_data, self.data[col])) for col in self.get_columns() if col != x_col]
+        data = [list(map(en.parse_data, self.data[col])) for col in self.get_columns()]
+        x_data = list(map(en.parse_data, self.data[x_col]))
         for idx in range(len(data)):
-            plt.plot(data[idx], label=self.get_columns()[idx])
+            if type(data[idx][0]) == date or self.get_columns()[idx] == x_col:
+                continue
+            if type(x_data[0]) == date:
+                plt.plot(x_data, data[idx], label=self.get_columns()[idx])
+                plt.gcf().autofmt_xdate()
+            else: 
+                plt.plot(x_data, data[idx], label=self.get_columns()[idx])
         plt.legend()
         plt.show()
         return r.Status(True)
