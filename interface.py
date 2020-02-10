@@ -141,7 +141,10 @@ class Interface:
         usage = "\tUsage: edit <item_name> <entry_number>"
         if not self.check_num_params(parameters, [2], usage):
             return r.Status(False)
-        item = self.logs[parameters[0]]
+        item = parameters[0]
+        if not self.check_item(item):
+            return r.Status(False)
+        item = self.logs[item]
         index = parameters[1]
         columns = item.get_columns()
         prompt = "\nEnter data for columns (" + ", ".join(columns) + "): "
@@ -157,7 +160,10 @@ class Interface:
         usage = "\tUsage: delete <item_name> <entry_number>"
         if not self.check_num_params(parameters, [2], usage):
             return r.Status(False)
-        item = self.logs[parameters[0]]
+        item = parameters[0]
+        if not self.check_item(item):
+            return r.Status(False)
+        item = self.logs[item]
         index = parameters[1]
         return item.delete_entry(int(index))
 
@@ -166,6 +172,9 @@ class Interface:
         usage = "\tUsage: graph <item_name> <x_column>"
         if not self.check_num_params(parameters, [2], usage):
             return r.Status(False)
-        item = self.logs[parameters[0]]
+        item = parameters[0]
+        if not self.check_item(item):
+            return r.Status(False)
+        item = self.logs[item]
         x_col = parameters[1]
         return item.graph(x_col)

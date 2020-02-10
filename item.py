@@ -136,7 +136,9 @@ class LoggedItem:
         data = [list(map(en.parse_data, self.data[col])) for col in self.get_columns()]
         x_data = list(map(en.parse_data, self.data[x_col]))
         for idx in range(len(data)):
-            if type(data[idx][0]) == date or self.get_columns()[idx] == x_col:
+            if (type(data[idx][0]) == date 
+                or type(data[idx][0]) == str
+                or self.get_columns()[idx] == x_col):
                 continue
             if type(x_data[0]) == date:
                 plt.plot(x_data, data[idx], label=self.get_columns()[idx])
