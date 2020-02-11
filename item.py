@@ -133,18 +133,19 @@ class LoggedItem:
 
     def graph(self, x_col):
         """Graph the data wrt to x_col."""
-        data = [list(map(en.parse_data, self.data[col])) for col in self.get_columns()]
-        x_data = list(map(en.parse_data, self.data[x_col]))
-        for idx in range(len(data)):
-            if (type(data[idx][0]) == date 
-                or type(data[idx][0]) == str
-                or self.get_columns()[idx] == x_col):
+        data = self.data.applymap(en.parse_data).groupby(x_col).mean()
+        x_data = list(data.index)
+        for col in data.columns:
+            y_data = list(data[col])
+            if (type(y_data[0]) == date 
+                or type(y_data[0]) == str
+                or data[col].name == x_col):
                 continue
             if type(x_data[0]) == date:
-                plt.plot(x_data, data[idx], label=self.get_columns()[idx])
+                plt.plot(x_data, y_data, label=data[col].name)
                 plt.gcf().autofmt_xdate()
             else: 
-                plt.plot(x_data, data[idx], label=self.get_columns()[idx])
+                plt.plot(x_data, y_data, label=data[col].name)
         plt.legend()
         plt.show()
         return r.Status(True)
