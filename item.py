@@ -80,9 +80,9 @@ class LoggedItem:
                 "<=" : lambda c, v : c <= v,
         }
         mask = None
-        if filter_col is not None:
+        if filter_col:
             if filter_col not in self.get_columns():
-                return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (col, ", ".join(self.get_columns())))
+                return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (filter_col, ", ".join(self.get_columns())))
             if filter_op not in filters:
                 return r.Status(False, "\tFilter operation \"" + filter_op + "\" invalid\n\tValid operations: " + ", ".join(filters.keys()))
             column = self.data[filter_col].map(en.parse_data)

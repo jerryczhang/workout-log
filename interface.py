@@ -90,7 +90,7 @@ class Interface:
             return r.Status(False)
         logged_item = self.logs[item]
         if len(parameters) == 5:
-            col, filter_col, filter_op, filter_val = parameters[1:]
+            filter_col, filter_op, filter_val, col = parameters[1:]
             return logged_item.get_entries(filter_col, filter_op, filter_val, col)
         elif len(parameters) == 4:
             filter_col, filter_op, filter_val = parameters[1:]
