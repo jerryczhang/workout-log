@@ -126,13 +126,20 @@ class LoggedItem:
 
     def delete_entry(self, index):
         """Delete an entry in the DataFrame."""
+        if not index.isnumeric():
+            return r.Status(False, "\tIndex must be numeric")
+        else:
+            index = int(index)
         if index not in self.data.index:
             return r.Status(False, "\tEntry number " + str(index) + " does not exist")
         self.data = self.data.drop(index)
+        self.data.to_csv(self.directory)
         return r.Status(True)
 
     def graph(self, x_col):
         """Graph the data wrt to x_col."""
+        if x_col not in self.get_columns():
+            return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (x_col, ", ".join(self.get_columns())))
         data = self.data.applymap(en.parse_data).groupby(x_col).mean()
         x_data = list(data.index)
         for col in data.columns:

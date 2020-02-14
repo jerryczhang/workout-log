@@ -129,7 +129,7 @@ class Interface:
                     if run.failed():
                         return run
                 user_in = input(prompt)
-            return run
+            return r.Status(True)
 
     def list(self, parameters):
         """List logged items."""
@@ -165,7 +165,7 @@ class Interface:
             return r.Status(False)
         item = self.logs[item]
         index = parameters[1]
-        return item.delete_entry(int(index))
+        return item.delete_entry(index)
 
     def graph(self, parameters):
         """Graph an item."""
