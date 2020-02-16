@@ -18,8 +18,8 @@ class Interface:
                 "delete": self.delete,
                 "graph": self.graph,
         }                 
-        self.load_logs()
         while True:
+            self.load_logs()
             command = self.get_command()
             if command[0] == "quit":
                 break

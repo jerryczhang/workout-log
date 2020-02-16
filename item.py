@@ -100,13 +100,15 @@ class LoggedItem:
                 return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (col, ", ".join(self.get_columns())))
     
         if mask is not None and col:
-            print(self.data[col][mask])
+            filtered_data = self.data[col][mask].to_frame()
         elif mask is not None:
-            print(self.data[mask])
+            filtered_data = self.data[mask]
         elif col:
-            print(self.data[col])
+            filtered_data = self.data[col].to_frame()
         else:
-            print(self.data)
+            filtered_data = self.data
+        print(filtered_data)
+        filtered_data.to_csv("logs/last.txt")
         return r.Status(True)
 
     def add_columns(self, columns):
