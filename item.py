@@ -140,7 +140,10 @@ class LoggedItem:
         """Graph the data wrt to x_col."""
         if x_col not in self.get_columns():
             return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (x_col, ", ".join(self.get_columns())))
-        data = self.data.applymap(en.parse_data).groupby(x_col).mean()
+        try:
+            data = self.data.applymap(en.parse_data).groupby(x_col).mean()
+        except pd.core.base.DataError as e:
+            return r.Status(False, "\t" + str(e))
         x_data = list(data.index)
         for col in data.columns:
             y_data = list(data[col])
