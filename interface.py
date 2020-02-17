@@ -169,12 +169,16 @@ class Interface:
 
     def graph(self, parameters):
         """Graph an item."""
-        usage = "\tUsage: graph <item_name> <x_column>"
-        if not self.check_num_params(parameters, [2], usage):
+        usage = "\tUsage: graph <item_name> <x_column> [graph_type]"
+        if not self.check_num_params(parameters, [2, 3], usage):
             return r.Status(False)
         item = parameters[0]
         if not self.check_item(item):
             return r.Status(False)
         item = self.logs[item]
         x_col = parameters[1]
-        return item.graph(x_col)
+        if len(parameters) == 2:
+            return item.graph(x_col, "line")
+        else:
+            graph_type = parameters[2]
+            return item.graph(x_col, graph_type)

@@ -138,12 +138,19 @@ class LoggedItem:
         self.data.to_csv(self.directory)
         return r.Status(True)
 
-    def graph(self, x_col):
+    def graph(self, x_col, graph_type):
         """Graph the data wrt to x_col."""
+        graph_operations = {
+                "line": lambda x_col : self.data.applymap(en.parse_data).groupby(x_col).mean(),
+                "bar" : lambda x_col : self.data.applymap(en.parse_data).groupby(x_col).sum(),
+                }
         if x_col not in self.get_columns():
             return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (x_col, ", ".join(self.get_columns())))
         try:
-            data = self.data.applymap(en.parse_data).groupby(x_col).mean()
+            if graph_type in graph_operations:
+                data = graph_operations[graph_type](x_col)
+            else:
+                return r.Status(False, "\tGraph type \"%s\" invalid\n\tValid graph types: %s" % (graph_type, ", ".join(graph_operations.keys())))
         except pd.core.base.DataError as e:
             return r.Status(False, "\t" + str(e))
         x_data = list(data.index)
@@ -153,11 +160,16 @@ class LoggedItem:
                 or type(y_data[0]) == str
                 or data[col].name == x_col):
                 continue
-            if type(x_data[0]) == date:
-                plt.plot(x_data, y_data, label=data[col].name)
-                plt.gcf().autofmt_xdate()
-            else: 
-                plt.plot(x_data, y_data, label=data[col].name)
+            if graph_type == "line":
+                if type(x_data[0]) == date:
+                    plt.plot(x_data, y_data, label=data[col].name)
+                    plt.gcf().autofmt_xdate()
+                else: 
+                    plt.plot(x_data, y_data, label=data[col].name)
+            elif graph_type == "bar":
+                plt.bar(x_data, y_data, align="center", label=data[col].name)
+                if type(x_data[0]) == date:
+                    plt.gcf().autofmt_xdate()
         plt.legend()
         plt.show()
         return r.Status(True)
