@@ -21,6 +21,7 @@ class LoggedItem:
             self.data = pd.read_csv(self.directory, index_col=0, dtype=str)
         else:
             self.data = pd.DataFrame(columns=columns)
+            self.data.to_csv(self.directory)
 
     def get_columns(self):
         """Return the columns of this item."""

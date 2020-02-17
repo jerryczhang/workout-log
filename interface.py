@@ -69,6 +69,7 @@ class Interface:
         """Create a new logged item."""
         columns = input("Enter columns for new item: ").split()
         new_item = LoggedItem(name, columns)
+        self.logs[name] = new_item
         return new_item
 
     def check_num_params(self, params, valid_nums, msg):
