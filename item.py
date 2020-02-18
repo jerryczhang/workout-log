@@ -26,6 +26,10 @@ class LoggedItem:
     def get_columns(self):
         """Return the columns of this item."""
         return list(self.data.columns)
+
+    def get_indices(self):
+        """Return the indices of this item."""
+        return list(self.data.index)
     
     def checktype(self, vals):
         """Check if the types of incoming data are compatible."""
@@ -116,6 +120,12 @@ class LoggedItem:
         """Add columns to the DataFrame."""
         for column in columns:
             a[column] = []
+
+    def expand(self, col_name, data):
+        """Add a column with data to the DataFrame."""
+        self.data[col_name] = data
+        self.data.to_csv(self.directory)
+        return r.Status(True)
 
     def edit_entry(self, index, data):
         """Edit an entry in the DataFrame."""

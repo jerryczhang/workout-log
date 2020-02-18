@@ -15,6 +15,7 @@ class Interface:
                 "view": self.view,
                 "log":  self.log,
                 "edit": self.edit,
+                "expand": self.expand,
                 "delete": self.delete,
                 "graph": self.graph,
         }                 
@@ -156,6 +157,15 @@ class Interface:
                 return entry
         return item.edit_entry(index, user_in)
 
+    def expand(self, parameters):
+        """Add a column to an item."""
+        item = parameters[0]
+        item = self.logs[item]
+        prompt = "\nEnter data for %d entries: " % (len(item.get_indices()))
+        data = input(prompt).split()
+        data = list(map(en.encode_input, data))
+        return item.expand(parameters[1], data)
+    
     def delete(self, parameters):
         """Delete an entry from the table."""
         usage = "\tUsage: delete <item_name> <entry_number>"
