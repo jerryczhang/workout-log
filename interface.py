@@ -159,7 +159,12 @@ class Interface:
 
     def expand(self, parameters):
         """Add a column to an item."""
+        usage = "\tUsage: expand <item_name> <new_column_name>"
+        if not self.check_num_params(parameters, [2], usage):
+            return r.Status(False)
         item = parameters[0]
+        if not self.check_item(item):
+            return r.Status(False)
         item = self.logs[item]
         prompt = "\nEnter data for %d entries: " % (len(item.get_indices()))
         data = input(prompt).split()

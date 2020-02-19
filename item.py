@@ -123,6 +123,8 @@ class LoggedItem:
 
     def expand(self, col_name, data):
         """Add a column with data to the DataFrame."""
+        if len(data) != len(self.get_indices()):
+            return r.Status(False, "\tInvalid number of entries: %d entered, %d needed" % (len(data), len(self.get_indices())))
         self.data[col_name] = data
         self.data.to_csv(self.directory)
         return r.Status(True)
