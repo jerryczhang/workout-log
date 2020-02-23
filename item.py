@@ -5,7 +5,7 @@ import encode as en
 import return_code as r
 from matplotlib.dates import date2num
 from datetime import date
-from os import path
+import os
 
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
@@ -17,7 +17,7 @@ class LoggedItem:
         """Initialize data table."""
         self.name = name
         self.directory = "logs/" + name + ".txt"
-        if path.exists(self.directory):
+        if os.path.exists(self.directory):
             self.data = pd.read_csv(self.directory, index_col=0, dtype=str)
         else:
             self.data = pd.DataFrame(columns=columns)
@@ -149,6 +149,11 @@ class LoggedItem:
             return r.Status(False, "\tEntry number " + str(index) + " does not exist")
         self.data = self.data.drop(index)
         self.data.to_csv(self.directory)
+        return r.Status(True)
+
+    def delete_item(self):
+        """Delete this item."""
+        os.remove(self.directory)
         return r.Status(True)
 
     def graph(self, x_col, graph_type):

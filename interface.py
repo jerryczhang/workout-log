@@ -170,18 +170,35 @@ class Interface:
         data = input(prompt).split()
         data = list(map(en.encode_input, data))
         return item.expand(parameters[1], data)
+
+    def get_conf_delete(self, item):
+        """Get user confirmation for deleting an item."""
+        prompt = "\tDelete \"" + item + "\"? Re-type item name to confirm: " 
+        user_in = input(prompt)
+        if user_in == item:
+            return True
+        else:
+            return False
+
     
     def delete(self, parameters):
         """Delete an entry from the table."""
-        usage = "\tUsage: delete <item_name> <entry_number>"
-        if not self.check_num_params(parameters, [2], usage):
+        usage = "\tUsage: delete <item_name> [entry_number]"
+        if not self.check_num_params(parameters, [1, 2], usage):
             return r.Status(False)
         item = parameters[0]
         if not self.check_item(item):
             return r.Status(False)
         item = self.logs[item]
-        index = parameters[1]
-        return item.delete_entry(index)
+        if len(parameters) == 2:
+            index = parameters[1]
+            return item.delete_entry(index)
+        elif len(parameters) == 1:
+            if self.get_conf_delete(item.name):
+                self.logs.pop(item.name)
+                return item.delete_item()
+            else:
+                return r.Status(False, "Input does not match item name, delete cancelled")
 
     def graph(self, parameters):
         """Graph an item."""
