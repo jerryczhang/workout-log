@@ -172,26 +172,19 @@ class LoggedItem:
         except pd.core.base.DataError as e:
             return r.Status(False, "\t" + str(e))
         x_data = list(data.index)
-        bar_count = 0
-        bar_width = 0.35
-        index = np.arange(len(x_data))
         for idx, col in enumerate(data.columns):
             y_data = list(data[col])
-            if (type(y_data[0]) == date 
-                or type(y_data[0]) == str
-                or data[col].name == x_col):
-                continue
             if graph_type == "line":
                 plt.plot(x_data, y_data, label=data[col].name)
             elif graph_type == "bar":
-                bar_count += 1
+                bar_count = len(data.columns)
+                bar_width = 0.7 / bar_count
+                index = np.arange(len(x_data))
                 plt.bar(index + idx * bar_width, y_data, bar_width, label=data[col].name)
-        if graph_type == "bar":
-            x_ticks = index + (bar_count * bar_width - bar_width) / 2
-            plt.xticks(x_ticks, x_data)
+                x_ticks = index + (bar_count * bar_width - bar_width) / 2
+                plt.xticks(x_ticks, x_data)
         if type(x_data[0]) == date:
             plt.gcf().autofmt_xdate()
-
         plt.legend()
         plt.show()
         return r.Status(True)
