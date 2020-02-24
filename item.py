@@ -129,6 +129,14 @@ class LoggedItem:
         self.data.to_csv(self.directory)
         return r.Status(True)
 
+    def cut(self, col_name):
+        """Remove a column from the DataFrame."""
+        if col_name not in self.get_columns():
+            return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (col_name, ", ".join(self.get_columns())))
+        self.data = self.data.drop(col_name, axis=1)
+        self.data.to_csv(self.directory)
+        return r.Status(True)
+
     def edit_entry(self, index, data):
         """Edit an entry in the DataFrame."""
         dataf = pd.DataFrame([data], columns=self.get_columns())

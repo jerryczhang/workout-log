@@ -16,6 +16,7 @@ class Interface:
                 "log":  self.log,
                 "edit": self.edit,
                 "expand": self.expand,
+                "cut" : self.cut,
                 "delete": self.delete,
                 "graph": self.graph,
         }                 
@@ -171,11 +172,26 @@ class Interface:
         data = list(map(en.encode_input, data))
         return item.expand(parameters[1], data)
 
-    def get_conf_delete(self, item):
+    def cut(self, parameters):
+        """Delete a column from an item."""
+        usage = "\tUsage: cut <item_name> <column_name>"
+        if not self.check_num_params(parameters, [2], usage):
+            return r.Status(False)
+        item = parameters[0]
+        if not self.check_item(item):
+            return r.Status(False)
+        item = self.logs[item]
+        col = parameters[1]
+        if self.get_conf_delete(col, "column"):
+            return item.cut(col)
+        else:
+            return r.Status(False, "Input does not match column name, delete cancelled")
+
+    def get_conf_delete(self, name, datatype):
         """Get user confirmation for deleting an item."""
-        prompt = "\tDelete \"" + item + "\"? Re-type item name to confirm: " 
+        prompt = "\tDelete \"" + name + "\"? Re-type " + datatype + " name to confirm: " 
         user_in = input(prompt)
-        if user_in == item:
+        if user_in == name:
             return True
         else:
             return False
@@ -194,7 +210,7 @@ class Interface:
             index = parameters[1]
             return item.delete_entry(index)
         elif len(parameters) == 1:
-            if self.get_conf_delete(item.name):
+            if self.get_conf_delete(item.name, "item"):
                 self.logs.pop(item.name)
                 return item.delete_item()
             else:
