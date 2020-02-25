@@ -60,13 +60,9 @@ class LoggedItem:
         col_index = self.checktype(dataf)
         if col_index != -1:
             return r.Status(False, "\tInvalid type entered for column \"%s\"" % self.get_columns()[col_index])
-        if not index.isnumeric():
-            return r.Status(False, "\tIndex must be an integer")
         index = int(index)
         max_index = list(self.data.index)[-1]
-        if index < 0:
-            return r.Status(False, "\tIndex must be at least 0")
-        elif index > max_index:
+        if index > max_index:
             return self.append(data)
         else:
             data_a = self.data.iloc[:index]

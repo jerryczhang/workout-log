@@ -93,7 +93,7 @@ class Interface:
             return r.Status(False)
         logged_item = self.logs[item]
         if len(parameters) == 5:
-            filter_col, filter_op, filter_val, col = parameters[1:]
+            col, filter_col, filter_op, filter_val = parameters[1:]
             return logged_item.get_entries(filter_col, filter_op, filter_val, col)
         elif len(parameters) == 4:
             filter_col, filter_op, filter_val = parameters[1:]
@@ -115,10 +115,12 @@ class Interface:
         item = self.logs[item]
         columns = item.get_columns()
         if len(parameters) == 2:
+            index = parameters[1]
+            if not index.isnumeric():
+                return r.Status(False, "\tIndex must be an integer")
             prompt = "Enter data for columns (%s): " % ", ".join(columns)
             user_in = input(prompt)
             data = list(map(en.encode_input, user_in.split()))
-            index = parameters[1]
             return item.insert(data, index)
         elif len(parameters) == 1:
             prompt = "Enter data for columns (%s) (Enter 'quit' when done): " % ", ".join(columns)
@@ -149,6 +151,8 @@ class Interface:
             return r.Status(False)
         item = self.logs[item]
         index = parameters[1]
+        if not index.isnumeric():
+            return r.Status(False, "\tIndex must be an integer")
         columns = item.get_columns()
         prompt = "\nEnter data for columns (" + ", ".join(columns) + "): "
         user_in = input(prompt).split()
