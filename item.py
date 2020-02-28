@@ -168,6 +168,14 @@ class LoggedItem:
         os.remove(self.directory)
         return r.Status(True)
 
+    def rename(self, name):
+        """Rename this item."""
+        self.name = name
+        os.remove(self.directory)
+        self.directory = "logs/" + name + ".txt"
+        self.data.to_csv(self.directory)
+        return r.Status(True)
+
     def graph(self, x_col, graph_type):
         """Graph the data wrt to x_col."""
         graph_operations = {

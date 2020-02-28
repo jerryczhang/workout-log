@@ -18,6 +18,7 @@ class Interface:
                 "expand": self.expand,
                 "cut" : self.cut,
                 "delete": self.delete,
+                "rename": self.rename,
                 "graph": self.graph,
         }                 
         while True:
@@ -219,6 +220,18 @@ class Interface:
                 return item.delete_item()
             else:
                 return r.Status(False, "Input does not match item name, delete cancelled")
+
+    def rename(self, parameters):
+        """Rename an item."""
+        usage = "\tUsage: rename <item_name> <new name>"
+        if not self.check_num_params(parameters, [2], usage):
+            return r.Status(False)
+        item = parameters[0]
+        if not self.check_item(item):
+            return r.Status(False)
+        item = self.logs[item]
+        new_name = parameters[1]
+        return item.rename(new_name)
 
     def graph(self, parameters):
         """Graph an item."""
