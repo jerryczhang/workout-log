@@ -97,17 +97,25 @@ class LoggedItem:
             except TypeError:
                 return r.Status(False, "\tInvalid type entered (%s) for column type (%s)" % (type(value), type(column[0])))
         if col:
-            if col not in self.get_columns():
+            col = en.parse_data(col)
+            if type(col) == str and col not in self.get_columns():
                 return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (col, ", ".join(self.get_columns())))
-    
+            elif type(col) == list and col[1] > len(self.get_columns()):
+                return r.Status(False, "\tColumn index %d out of bounds, max is %d" % (col[1], len(self.get_columns())))
+        if type(col) == list:
+            col = self.get_columns()[col[0]:col[1]:col[2]]
+        if type(col) == r.Status:
+            return col
         if mask is not None and col:
-            filtered_data = self.data[col][mask].to_frame()
+            filtered_data = self.data[col][mask]
         elif mask is not None:
             filtered_data = self.data[mask]
         elif col:
-            filtered_data = self.data[col].to_frame()
+            filtered_data = self.data[col]
         else:
             filtered_data = self.data
+        if type(filtered_data) == pd.core.series.Series:
+            filtered_data = filtered_data.to_frame()
         print(filtered_data)
         filtered_data.to_csv("logs/last.txt")
         return r.Status(True)

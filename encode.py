@@ -37,13 +37,16 @@ def parse_slice(string):
     indices = []
     slice_in = string.split(':')
     if len(slice_in) != 2 and len(slice_in) != 3:
-        return r.Status(False, "\tInvalid index entered: " + string)
+        return r.Status(False, "\tIndex must be in the form s:e or s:e:i")
     for num in slice_in:
         if not num.isnumeric():
-            return r.Status(False, "\tInvalid index entered: " + string)
-        indices.append(int(num) - 1)
+            return r.Status(False, "\tInvalid index \"" + num + "\", index must be an integer")
+        indices.append(int(num))
     if len(indices) == 2:
         indices.append(1)
+    if indices[1] < indices[0]:
+        return r.Status(False, "\tIndex must have a greater ending position than starting position")
+    indices[0] -= 1
     return indices
 
 def encode_input(user_in):
