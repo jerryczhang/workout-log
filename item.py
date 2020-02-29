@@ -46,11 +46,11 @@ class LoggedItem:
 
     def append(self, data):
         """Append a new entry."""
-        data = pd.DataFrame([data], columns=self.get_columns())
-        col_index = self.checktype(data)
+        dataf = pd.DataFrame([data], columns=self.get_columns())
+        col_index = self.checktype(dataf)
         if col_index != -1:
             return r.Status(False, "\tInvalid type entered for column \"%s\"" % self.get_columns()[col_index])
-        self.data = self.data.append(data, ignore_index=True)
+        self.data = self.data.append(dataf, ignore_index=True)
         self.data.to_csv(self.directory)
         return r.Status(True)
 
@@ -80,12 +80,13 @@ class LoggedItem:
                 ">=" : lambda c, v : c >= v,
                 "<=" : lambda c, v : c <= v,
         }
-        mask = None
         if filter_col:
             if filter_col not in self.get_columns():
-                return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (filter_col, ", ".join(self.get_columns())))
+                return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
+                        % (filter_col, ", ".join(self.get_columns())))
             if filter_op not in filters:
-                return r.Status(False, "\tFilter operation \"" + filter_op + "\" invalid\n\tValid operations: " + ", ".join(filters.keys()))
+                return r.Status(False, "\tFilter operation \"%s\" invalid\n\tValid operations: %s"
+                        % (filter_op, ", ".join(filters.keys())))
             column = self.data[filter_col].map(en.parse_data)
             value = en.parse_data(value)
             if type(column) is r.Status:
@@ -95,25 +96,26 @@ class LoggedItem:
             try:
                 mask = filters[filter_op](column, value)
             except TypeError:
-                return r.Status(False, "\tInvalid type entered (%s) for column type (%s)" % (type(value), type(column[0])))
+                return r.Status(False, "\tInvalid type entered (%s) for column type (%s)" 
+                        % (type(value), type(column[0])))
+        else:
+            mask = [True for _ in range(len(self.data))]
         if col:
             col = en.parse_data(col)
-            if type(col) == str and col not in self.get_columns():
-                return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (col, ", ".join(self.get_columns())))
-            elif type(col) == list and col[1] > len(self.get_columns()):
-                return r.Status(False, "\tColumn index %d out of bounds, max is %d" % (col[1], len(self.get_columns())))
-        if type(col) == list:
-            col = self.get_columns()[col[0]:col[1]:col[2]]
-        if type(col) == r.Status:
-            return col
-        if mask is not None and col:
-            filtered_data = self.data[col][mask]
-        elif mask is not None:
-            filtered_data = self.data[mask]
-        elif col:
-            filtered_data = self.data[col]
+            if type(col) == str:
+                if col not in self.get_columns():
+                    return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
+                            % (col, ", ".join(self.get_columns())))
+            elif type(col) == list:
+                if col[1] > len(self.get_columns()):
+                    return r.Status(False, "\tColumn index %d out of bounds, max is %d" 
+                            % (col[1], len(self.get_columns())))
+                col = self.get_columns()[col[0]:col[1]:col[2]]
+            elif type(col) == r.Status:
+                return col
         else:
-            filtered_data = self.data
+            col = self.get_columns() 
+        filtered_data = self.data[col][mask]
         if type(filtered_data) == pd.core.series.Series:
             filtered_data = filtered_data.to_frame()
         print(filtered_data)
