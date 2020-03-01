@@ -11,6 +11,7 @@ class Interface:
         """Start the interface, loops until user enters 'quit'."""
         self.commands = {
                 "quit": None,
+                "help": self.help,
                 "list": self.list,
                 "view": self.view,
                 "log":  self.log,
@@ -83,6 +84,21 @@ class Interface:
         else:
             print(msg)
             return False
+
+    def help(self, parameters):
+        """Print out help information."""
+        print("\tThis program is a manager and visualization tool for CSV (comma separated value) files")
+        print("\tYou can enter commands in order to view, edit, graph, etc.")
+        print("\tTo see how to use a command, enter the command name and press enter.")
+        print("\tRequired arguments are denoted with angle brackets <>")
+        print("\tOptional arguments are denoted with varying brackets, where each set of arguments uses the same symbol")
+        print("\tIf you want to specify a date, make sure your input has a '/' character")
+        print("\tIf you want to specify a a range of columns, use the notation begin:end:step")
+        print("\tThe view command automatically generates an item called 'last'")
+        print("\tYou can use the 'last' item to chain commands, such as viewing and graphing")
+        print("\tTo get started, create a new item by typing \"view <item_name>\"")
+        return r.Status(True)
+
 
     def view(self, parameters):
         """View the log, with parameters given by user."""

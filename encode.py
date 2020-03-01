@@ -37,7 +37,7 @@ def parse_slice(string):
     indices = []
     slice_in = string.split(':')
     if len(slice_in) != 2 and len(slice_in) != 3:
-        return r.Status(False, "\tIndex must be in the form s:e or s:e:i")
+        return r.Status(False, "\tIndex must be in the form start:end or start:end:step")
     for num in slice_in:
         if not num.isnumeric():
             return r.Status(False, "\tInvalid index \"" + num + "\", index must be an integer")
