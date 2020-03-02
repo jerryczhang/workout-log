@@ -206,11 +206,11 @@ class Interface:
         if self.get_conf_delete(col, "column"):
             return item.cut(col)
         else:
-            return r.Status(False, "Input does not match column name, delete cancelled")
+            return r.Status(False, "\tInput does not match column name, delete cancelled")
 
     def get_conf_delete(self, name, datatype):
         """Get user confirmation for deleting an item."""
-        prompt = "\tDelete \"" + name + "\"? Re-type " + datatype + " name to confirm: " 
+        prompt = "Delete \"" + name + "\"? Re-type " + datatype + " name to confirm: " 
         user_in = input(prompt)
         if user_in == name:
             return True
@@ -235,7 +235,7 @@ class Interface:
                 self.logs.pop(item.name)
                 return item.delete_item()
             else:
-                return r.Status(False, "Input does not match item name, delete cancelled")
+                return r.Status(False, "\tInput does not match item name, delete cancelled")
 
     def rename(self, parameters):
         """Rename an item."""
@@ -247,6 +247,8 @@ class Interface:
             return r.Status(False)
         item = self.logs[item]
         new_name = parameters[1]
+        if new_name in self.logs:
+            return r.Status(False, "\tItem \"%s\" already exists" % new_name)
         return item.rename(new_name)
 
     def graph(self, parameters):
