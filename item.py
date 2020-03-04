@@ -175,14 +175,21 @@ class LoggedItem:
         os.remove(self.directory)
         return r.Status(True)
 
-    def rename(self, name):
-        """Rename this item."""
-        self.name = name
-        os.remove(self.directory)
-        self.directory = "logs/" + name + ".txt"
-        self.data.to_csv(self.directory)
-        return r.Status(True)
-
+    def rename(self, name, col=None):
+        """Rename this item, or a column."""
+        if col == None:
+            self.name = name
+            os.remove(self.directory)
+            self.directory = "logs/" + name + ".txt"
+            self.data.to_csv(self.directory)
+            return r.Status(True)
+        else:
+            if col not in self.get_columns():
+                return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
+                        % (col, ", ".join(self.get_columns())))
+            self.data = self.data.rename(columns={col:name})
+            self.data.to_csv(self.directory)
+            return r.Status(True)
     def graph(self, x_col, graph_type):
         """Graph the data wrt to x_col."""
         graph_operations = {
