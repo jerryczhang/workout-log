@@ -49,7 +49,8 @@ class LoggedItem:
         dataf = pd.DataFrame([data], columns=self.get_columns())
         col_index = self.checktype(dataf)
         if col_index != -1:
-            return r.Status(False, "\tInvalid type entered for column \"%s\"" % self.get_columns()[col_index])
+            return r.Status(False, "\tInvalid type entered for column \"%s\"" 
+                    % self.get_columns()[col_index])
         self.data = self.data.append(dataf, ignore_index=True)
         self.data.to_csv(self.directory)
         return r.Status(True)
@@ -59,7 +60,8 @@ class LoggedItem:
         dataf = pd.DataFrame([data], columns=self.get_columns())
         col_index = self.checktype(dataf)
         if col_index != -1:
-            return r.Status(False, "\tInvalid type entered for column \"%s\"" % self.get_columns()[col_index])
+            return r.Status(False, "\tInvalid type entered for column \"%s\"" 
+                    % self.get_columns()[col_index])
         index = int(index)
         max_index = list(self.data.index)[-1]
         if index > max_index:
@@ -130,7 +132,8 @@ class LoggedItem:
     def expand(self, col_name, data):
         """Add a column with data to the DataFrame."""
         if len(data) != len(self.get_indices()):
-            return r.Status(False, "\tInvalid number of entries: %d entered, %d needed" % (len(data), len(self.get_indices())))
+            return r.Status(False, "\tInvalid number of entries: %d entered, %d needed" 
+                    % (len(data), len(self.get_indices())))
         self.data[col_name] = data
         self.data.to_csv(self.directory)
         return r.Status(True)
@@ -138,7 +141,8 @@ class LoggedItem:
     def cut(self, col_name):
         """Remove a column from the DataFrame."""
         if col_name not in self.get_columns():
-            return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (col_name, ", ".join(self.get_columns())))
+            return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
+                    % (col_name, ", ".join(self.get_columns())))
         self.data = self.data.drop(col_name, axis=1)
         self.data.to_csv(self.directory)
         return r.Status(True)
@@ -148,7 +152,8 @@ class LoggedItem:
         dataf = pd.DataFrame([data], columns=self.get_columns())
         col_index = self.checktype(dataf)
         if col_index != -1:
-            return r.Status(False, "\tInvalid type entered for column \"%s\"" % self.get_columns()[col_index])
+            return r.Status(False, "\tInvalid type entered for column \"%s\"" 
+                    % self.get_columns()[col_index])
         self.data.loc[int(index)] = data
         self.data.to_csv(self.directory)
         return r.Status(True)
@@ -160,7 +165,7 @@ class LoggedItem:
         else:
             index = int(index)
         if index not in self.data.index:
-            return r.Status(False, "\tEntry number " + str(index) + " does not exist")
+            return r.Status(False, "\tEntry number %d does not exist" % index)
         self.data = self.data.drop(index)
         self.data.to_csv(self.directory)
         return r.Status(True)
@@ -185,12 +190,14 @@ class LoggedItem:
                 "bar" : lambda x_col : self.data.applymap(en.parse_data).groupby(x_col).sum(),
                 }
         if x_col not in self.get_columns():
-            return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" % (x_col, ", ".join(self.get_columns())))
+            return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
+                    % (x_col, ", ".join(self.get_columns())))
         try:
             if graph_type in graph_operations:
                 data = graph_operations[graph_type](x_col)
             else:
-                return r.Status(False, "\tGraph type \"%s\" invalid\n\tValid graph types: %s" % (graph_type, ", ".join(graph_operations.keys())))
+                return r.Status(False, "\tGraph type \"%s\" invalid\n\tValid graph types: %s" 
+                    % (graph_type, ", ".join(graph_operations.keys())))
         except pd.core.base.DataError as e:
             return r.Status(False, "\t" + str(e))
         x_data = list(data.index)
