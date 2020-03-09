@@ -17,7 +17,6 @@ class Interface:
                 "log":  self.log,
                 "edit": self.edit,
                 "expand": self.expand,
-                "cut" : self.cut,
                 "delete": self.delete,
                 "rename": self.rename,
                 "graph": self.graph,
@@ -193,21 +192,6 @@ class Interface:
         data = list(map(en.encode_input, data))
         return item.expand(parameters[1], data)
 
-    def cut(self, parameters):
-        """Delete a column from an item."""
-        usage = "\tUsage: cut <item_name> <column_name>"
-        if not self.check_num_params(parameters, [2], usage):
-            return r.Status(False)
-        item = parameters[0]
-        if not self.check_item(item):
-            return r.Status(False)
-        item = self.logs[item]
-        col = parameters[1]
-        if self.get_conf_delete(col, "column"):
-            return item.cut(col)
-        else:
-            return r.Status(False, "\tInput does not match column name, delete cancelled")
-
     def get_conf_delete(self, name, datatype):
         """Get user confirmation for deleting an item."""
         prompt = "Delete \"" + name + "\"? Re-type " + datatype + " name to confirm: " 
@@ -217,18 +201,28 @@ class Interface:
         else:
             return False
 
-    
     def delete(self, parameters):
         """Delete an entry from the table."""
-        usage = "\tUsage: delete <item_name> [entry_number]"
-        if not self.check_num_params(parameters, [1, 2], usage):
+        usage = "\tUsage: delete <item_name> [\"column\" or \"entry\"] [column_name or entry_number]"
+        if not self.check_num_params(parameters, [1, 3], usage):
             return r.Status(False)
         item = parameters[0]
         if not self.check_item(item):
             return r.Status(False)
         item = self.logs[item]
-        if len(parameters) == 2:
-            index = parameters[1]
+        if len(parameters) == 3:
+            delete_type = parameters[1]
+            if delete_type == "column":
+                col = parameters[2]
+                if self.get_conf_delete(col, "column"):
+                    return item.delete_col(col)
+                else:
+                    return r.Status(False, "\tInput does not match column name, delete cancelled")
+            if delete_type == "entry":
+                index = parameters[2]
+                return item.delete_entry(index)
+            else:
+                return r.Status(False, "\tMust specify whether to delete column or entry")
             return item.delete_entry(index)
         elif len(parameters) == 1:
             if self.get_conf_delete(item.name, "item"):

@@ -131,14 +131,17 @@ class LoggedItem:
 
     def expand(self, col_name, data):
         """Add a column with data to the DataFrame."""
-        if len(data) != len(self.get_indices()):
-            return r.Status(False, "\tInvalid number of entries: %d entered, %d needed" 
+        if len(data) != len(self.get_indices()) and len(data) != 0:
+            return r.Status(False, "\tInvalid number of entries: %d entered, 0 or %d needed" 
                     % (len(data), len(self.get_indices())))
-        self.data[col_name] = data
+        if len(data) == 0:
+            self.data[col_name] = [0 for x in range(len(self.get_indices()))]
+        else:
+            self.data[col_name] = data
         self.data.to_csv(self.directory)
         return r.Status(True)
 
-    def cut(self, col_name):
+    def delete_col(self, col_name):
         """Remove a column from the DataFrame."""
         if col_name not in self.get_columns():
             return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
