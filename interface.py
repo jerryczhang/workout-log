@@ -135,6 +135,8 @@ class Interface:
             if not index.isnumeric():
                 return r.Status(False, "\tIndex must be an integer")
             index = int(index)
+        else:
+            index = None
         prompt = "Enter data for columns (%s) (Enter 'quit' when done): " % ", ".join(columns)
         user_in = input(prompt)
         while user_in != "quit":
@@ -142,11 +144,9 @@ class Interface:
             if len(data) != len(columns):
                 print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data), len(columns)))
             else:
+                run = item.insert(data, index)
                 if len(parameters) == 2:
-                    run = item.insert(data,index)
                     index += 1
-                else:
-                    run = item.append(data)
                 if run.failed():
                     return run
             user_in = input(prompt)

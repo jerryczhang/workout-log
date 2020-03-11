@@ -44,33 +44,21 @@ class LoggedItem:
                 return index
         return -1
 
-    def append(self, data):
-        """Append a new entry."""
-        dataf = pd.DataFrame([data], columns=self.get_columns())
-        col_index = self.checktype(dataf)
-        if col_index != -1:
-            return r.Status(False, "\tInvalid type entered for column \"%s\"" 
-                    % self.get_columns()[col_index])
-        self.data = self.data.append(dataf, ignore_index=True)
-        self.data.to_csv(self.directory)
-        return r.Status(True)
-
-    def insert(self, data, index):
+    def insert(self, data, index=None):
         """Insert a new entry at index."""
         dataf = pd.DataFrame([data], columns=self.get_columns())
         col_index = self.checktype(dataf)
         if col_index != -1:
             return r.Status(False, "\tInvalid type entered for column \"%s\"" 
                     % self.get_columns()[col_index])
-        max_index = list(self.data.index)[-1]
-        if index > max_index:
-            return self.append(data)
+        if index == None or index >= len(self.data):
+            self.data = self.data.append(dataf, ignore_index=True)
         else:
             data_a = self.data.iloc[:index]
             data_b = self.data.iloc[index:]
             self.data = data_a.append(dataf).append(data_b).reset_index(drop=True)
-            self.data.to_csv(self.directory)
-            return r.Status(True)
+        self.data.to_csv(self.directory)
+        return r.Status(True)
 
     def get_entries(self, filter_col=None, filter_op=None, value=None, col=None):
         """Pull up entries corresponding to filter."""
@@ -130,11 +118,11 @@ class LoggedItem:
 
     def expand(self, col_name, data):
         """Add a column with data to the DataFrame."""
-        if len(data) != len(self.get_indices()) and len(data) != 0:
+        if len(data) != len(self.data) and len(data) != 0:
             return r.Status(False, "\tInvalid number of entries: %d entered, 0 or %d needed" 
-                    % (len(data), len(self.get_indices())))
+                    % (len(data), len(self.data)))
         if len(data) == 0:
-            self.data[col_name] = [0 for x in range(len(self.get_indices()))]
+            self.data[col_name] = [0 for x in range(len(self.data))]
         else:
             self.data[col_name] = data
         self.data.to_csv(self.directory)
