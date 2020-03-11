@@ -134,23 +134,23 @@ class Interface:
             index = parameters[1]
             if not index.isnumeric():
                 return r.Status(False, "\tIndex must be an integer")
-            prompt = "Enter data for columns (%s): " % ", ".join(columns)
-            user_in = input(prompt)
+            index = int(index)
+        prompt = "Enter data for columns (%s) (Enter 'quit' when done): " % ", ".join(columns)
+        user_in = input(prompt)
+        while user_in != "quit":
             data = list(map(en.encode_input, user_in.split()))
-            return item.insert(data, index)
-        elif len(parameters) == 1:
-            prompt = "Enter data for columns (%s) (Enter 'quit' when done): " % ", ".join(columns)
-            user_in = input(prompt)
-            while user_in != "quit":
-                data = list(map(en.encode_input, user_in.split()))
-                if len(data) != len(columns):
-                    print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data), len(columns)))
+            if len(data) != len(columns):
+                print("\tColumn count mismatch: %d columns entered, needs %d." % (len(data), len(columns)))
+            else:
+                if len(parameters) == 2:
+                    run = item.insert(data,index)
+                    index += 1
                 else:
                     run = item.append(data)
-                    if run.failed():
-                        return run
-                user_in = input(prompt)
-            return r.Status(True)
+                if run.failed():
+                    return run
+            user_in = input(prompt)
+        return r.Status(True)
 
     def list(self, parameters):
         """List logged items."""

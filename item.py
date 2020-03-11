@@ -62,7 +62,6 @@ class LoggedItem:
         if col_index != -1:
             return r.Status(False, "\tInvalid type entered for column \"%s\"" 
                     % self.get_columns()[col_index])
-        index = int(index)
         max_index = list(self.data.index)[-1]
         if index > max_index:
             return self.append(data)
