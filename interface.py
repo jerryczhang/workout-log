@@ -187,10 +187,13 @@ class Interface:
         if not self.check_item(item):
             return r.Status(False)
         item = self.logs[item]
+        new_col = parameters[1]
+        if new_col in item.get_columns():
+            return r.Status(False, "\tColumn %s already exists" % new_col)
         prompt = "\nEnter data for %d entries: " % (len(item.get_indices()))
         data = input(prompt).split()
         data = list(map(en.encode_input, data))
-        return item.expand(parameters[1], data)
+        return item.expand(new_col, data)
 
     def get_conf_delete(self, name, datatype):
         """Get user confirmation for deleting an item."""
