@@ -182,9 +182,11 @@ class LoggedItem:
             return r.Status(True)
     def graph(self, x_col, graph_type):
         """Graph the data wrt to x_col."""
+        parsed_data = self.data.applymap(en.parse_data)
         graph_operations = {
-                "line": lambda x_col : self.data.applymap(en.parse_data).groupby(x_col).mean(),
-                "bar" : lambda x_col : self.data.applymap(en.parse_data).groupby(x_col).sum(),
+                "line": lambda x_col : parsed_data.groupby(x_col).mean(),
+                "bar" : lambda x_col : parsed_data.groupby(x_col).sum(),
+                "count": lambda x_col, d=self.data[x_col].value_counts() : pd.DataFrame({x_col:d.index,"count":d.values}).groupby(x_col).sum()
                 }
         if x_col not in self.get_columns():
             return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
@@ -192,6 +194,7 @@ class LoggedItem:
         try:
             if graph_type in graph_operations:
                 data = graph_operations[graph_type](x_col)
+                print(data)
             else:
                 return r.Status(False, "\tGraph type \"%s\" invalid\n\tValid graph types: %s" 
                     % (graph_type, ", ".join(graph_operations.keys())))
