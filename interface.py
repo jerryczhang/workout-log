@@ -265,6 +265,9 @@ class Interface:
             return r.Status(False)
         item = self.logs[item]
         x_col = parameters[1]
+        if x_col not in item.get_columns():
+            return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
+                    % (x_col, ", ".join(item.get_columns())))
         if len(parameters) == 2:
             return item.graph(x_col, "line")
         else:

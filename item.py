@@ -188,13 +188,9 @@ class LoggedItem:
                 "bar" : lambda x_col : parsed_data.groupby(x_col).sum(),
                 "count": lambda x_col, d=self.data[x_col].value_counts() : pd.DataFrame({x_col:d.index,"count":d.values}).groupby(x_col).sum()
                 }
-        if x_col not in self.get_columns():
-            return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
-                    % (x_col, ", ".join(self.get_columns())))
         try:
             if graph_type in graph_operations:
                 data = graph_operations[graph_type](x_col)
-                print(data)
             else:
                 return r.Status(False, "\tGraph type \"%s\" invalid\n\tValid graph types: %s" 
                     % (graph_type, ", ".join(graph_operations.keys())))
@@ -205,7 +201,7 @@ class LoggedItem:
             y_data = list(data[col])
             if graph_type == "line":
                 plt.plot(x_data, y_data, label=data[col].name)
-            elif graph_type == "bar":
+            elif graph_type == "bar" or graph_type == "count":
                 bar_count = len(data.columns)
                 bar_width = 0.7 / bar_count
                 index = np.arange(len(x_data))
