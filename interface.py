@@ -19,6 +19,7 @@ class Interface:
                 "expand": self.expand,
                 "delete": self.delete,
                 "rename": self.rename,
+                "copy": self.copy,
                 "graph": self.graph,
         }                 
         while True:
@@ -236,7 +237,7 @@ class Interface:
 
     def rename(self, parameters):
         """Rename an item."""
-        usage = "\tUsage: rename <item_name> {column_name} <new name>"
+        usage = "\tUsage: rename <item_name> {column_name} <new_name>"
         if not self.check_num_params(parameters, [2, 3], usage):
             return r.Status(False)
         item = parameters[0]
@@ -254,6 +255,22 @@ class Interface:
             if new_name in item.get_columns():
                 return r.Status(False, "\tColumn \"%s\" already exists" % new_name)
             return item.rename(new_name, col)
+
+    def copy(self, parameters):
+        """Copy an item."""
+        usage = "\tUsage: copy <item_name> <new_name>"
+        if not self.check_num_params(parameters, [2], usage):
+            return r.Status(False)
+        item = parameters[0]
+        if not self.check_item(item):
+            return r.Status(False)
+        item = self.logs[item]
+        new_name = parameters[1]
+        if new_name in self.logs:
+            return r.Status(False, "\tItem \"%s\" already exists" % new_name)
+        new_item = LoggedItem(new_name, copy_from=item)
+        self.logs[new_name] = new_item
+        return r.Status(True)
 
     def graph(self, parameters):
         """Graph an item."""

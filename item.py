@@ -13,15 +13,18 @@ register_matplotlib_converters()
 class LoggedItem:
     """Represents one item to track data under."""
 
-    def __init__(self, name, columns=[]):
+    def __init__(self, name, columns=[], copy_from=None):
         """Initialize data table."""
         self.name = name
         self.directory = "logs/" + name + ".txt"
         if os.path.exists(self.directory):
             self.data = pd.read_csv(self.directory, index_col=0, dtype=str)
-        else:
+        elif columns:
             self.data = pd.DataFrame(columns=columns)
-            self.data.to_csv(self.directory)
+            self.save()
+        elif copy_from:
+            self.data = copy_from.data.copy()
+            self.save()
 
     def get_columns(self):
         """Return the columns of this item."""
@@ -30,6 +33,10 @@ class LoggedItem:
     def get_indices(self):
         """Return the indices of this item."""
         return list(self.data.index)
+
+    def save(self):
+        """Save the data to CSV."""
+        self.data.to_csv(self.directory)
     
     def checktype(self, vals):
         """Check if the types of incoming data are compatible."""
@@ -57,7 +64,7 @@ class LoggedItem:
             data_a = self.data.iloc[:index]
             data_b = self.data.iloc[index:]
             self.data = data_a.append(dataf).append(data_b).reset_index(drop=True)
-        self.data.to_csv(self.directory)
+        self.save()
         return r.Status(True)
 
     def get_entries(self, filter_col=None, filter_op=None, value=None, col=None):
@@ -125,7 +132,7 @@ class LoggedItem:
             self.data[col_name] = [0 for x in range(len(self.data))]
         else:
             self.data[col_name] = data
-        self.data.to_csv(self.directory)
+        self.save()
         return r.Status(True)
 
     def delete_col(self, col_name):
@@ -134,7 +141,7 @@ class LoggedItem:
             return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
                     % (col_name, ", ".join(self.get_columns())))
         self.data = self.data.drop(col_name, axis=1)
-        self.data.to_csv(self.directory)
+        self.save()
         return r.Status(True)
 
     def edit_entry(self, index, data):
@@ -145,7 +152,7 @@ class LoggedItem:
             return r.Status(False, "\tInvalid type entered for column \"%s\"" 
                     % self.get_columns()[col_index])
         self.data.loc[int(index)] = data
-        self.data.to_csv(self.directory)
+        self.save()
         return r.Status(True)
 
     def delete_entry(self, index):
@@ -157,7 +164,7 @@ class LoggedItem:
         if index not in self.data.index:
             return r.Status(False, "\tEntry number %d does not exist" % index)
         self.data = self.data.drop(index)
-        self.data.to_csv(self.directory)
+        self.save()
         return r.Status(True)
 
     def delete_item(self):
@@ -171,14 +178,14 @@ class LoggedItem:
             self.name = name
             os.remove(self.directory)
             self.directory = "logs/" + name + ".txt"
-            self.data.to_csv(self.directory)
+            self.save()
             return r.Status(True)
         else:
             if col not in self.get_columns():
                 return r.Status(False, "\tColumn \"%s\" not found\n\tValid columns: %s" 
                         % (col, ", ".join(self.get_columns())))
             self.data = self.data.rename(columns={col:name})
-            self.data.to_csv(self.directory)
+            self.save()
             return r.Status(True)
     def graph(self, x_col, graph_type):
         """Graph the data wrt to x_col."""
