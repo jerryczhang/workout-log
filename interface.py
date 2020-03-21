@@ -2,6 +2,7 @@ from item import LoggedItem
 from datetime import date
 import encode as en
 import return_code as r
+import json
 import os
 
 class Interface:
@@ -13,8 +14,9 @@ class Interface:
                 "quit": None,
                 "help": self.help,
                 "list": self.list,
+                "tag": self.tag,
                 "view": self.view,
-                "log":  self.log,
+                "log": self.log,
                 "edit": self.edit,
                 "expand": self.expand,
                 "delete": self.delete,
@@ -31,12 +33,18 @@ class Interface:
                 self.process_command(command)
 
     def load_logs(self):
-        """Load in previously entered logs."""
+        """Load in previously entered logs and tags."""
         files = [f for f in os.listdir("logs/") if os.path.isfile(os.path.join("logs/", f))]
         self.logs = {}
         for item in files:
             name = item[:item.index('.')]
             self.logs[name] = LoggedItem(name)
+        tags = "tags.json"
+        if os.path.isfile(tags):
+            with open(tags) as f:
+                self.tags = json.load(f)
+        else:
+            self.tags = {}
 
     def process_command(self, command):
         """Perform actions based on the command."""
@@ -155,7 +163,37 @@ class Interface:
 
     def list(self, parameters):
         """List logged items."""
-        print("\tYour items: " + ", ".join(list(self.logs.keys())))
+        usage = "\tUsage: list [tag_name]"
+        if not self.check_num_params(parameters, [0,1], usage):
+            return r.Status(False)
+        if len(parameters) == 1:
+            tag = parameters[0]
+            show_list = self.tags[tag]
+        else:
+            show_list = list(self.logs.keys())
+        print("\tYour items: " + ", ".join(show_list))
+        return r.Status(True)
+    
+    def tag(self, parameters):
+        """Tag an item."""
+        usage = "\tUsage: tag <\"add\" or \"remove\"> <item_name> <tag_name>"
+        if not self.check_num_params(parameters, [3], usage):
+            return r.Status(False)
+        item = parameters[1]
+        if not self.check_item(item):
+            return r.Status(False)
+        tag = parameters[2] 
+        op = parameters[0]
+        if op == "add":
+            if tag not in self.tags:
+                self.tags[tag] = []
+            self.tags[tag].append(item)
+        elif op == "remove":
+            self.tags[tag].remove(item)
+        else:
+            return r.Status(False, "\tMust specify \"add\" or \"remove\"")
+        with open('tags.json','w') as f:
+            json.dump(self.tags, f)
         return r.Status(True)
 
     def edit(self, parameters):
