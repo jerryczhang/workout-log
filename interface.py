@@ -168,6 +168,8 @@ class Interface:
             return r.Status(False)
         if len(parameters) == 1:
             tag = parameters[0]
+            if tag not in self.tags:
+                return r.Status(False, "\tTag \"%s\" does not exist" % tag)
             show_list = self.tags[tag]
         else:
             show_list = list(self.logs.keys())
@@ -187,9 +189,19 @@ class Interface:
         if op == "add":
             if tag not in self.tags:
                 self.tags[tag] = []
+            if item in self.tags[tag]:
+                return r.Status(False, "\tItem \"%s\" already has tag \"%s\""
+                        % (item, tag))
             self.tags[tag].append(item)
         elif op == "remove":
+            if tag not in self.tags:
+                return r.Status(False, "\tTag \"%s\" does not exist" % tag)
+            if item not in self.tags[tag]:
+                return r.Status(False, "\tItem \"%s\" does not have tag \"%s\""
+                        % (item, tag))
             self.tags[tag].remove(item)
+            if self.tags[tag] == []:
+                del self.tags[tag]
         else:
             return r.Status(False, "\tMust specify \"add\" or \"remove\"")
         with open('tags.json','w') as f:
