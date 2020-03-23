@@ -178,9 +178,13 @@ class Interface:
     
     def tag(self, parameters):
         """Tag an item."""
-        usage = "\tUsage: tag <\"add\" or \"remove\"> <item_name> <tag_name>"
-        if not self.check_num_params(parameters, [3], usage):
+        usage = "\tUsage: tag <\"add\", \"remove\", or \"show\"> [item_name] [tag_name]"
+        if not self.check_num_params(parameters, [1,3], usage):
             return r.Status(False)
+        if parameters[0] == "show":
+            for tag, items in self.tags.items():
+                print("\t" + tag + ": " + ", ".join(items))
+            return r.Status(True)
         item = parameters[1]
         if not self.check_item(item):
             return r.Status(False)
