@@ -163,16 +163,22 @@ class Interface:
 
     def list(self, parameters):
         """List logged items."""
-        usage = "\tUsage: list [tag_name]"
-        if not self.check_num_params(parameters, [0,1], usage):
+        usage = "\tUsage: list <\"all\" or \"tags\"> [tag1,tag2,...]"
+        if not self.check_num_params(parameters, [1,2], usage):
             return r.Status(False)
-        if len(parameters) == 1:
-            tag = parameters[0]
-            if tag not in self.tags:
-                return r.Status(False, "\tTag \"%s\" does not exist" % tag)
-            show_list = self.tags[tag]
-        else:
+        op = parameters[0]
+        if op == "all":
             show_list = list(self.logs.keys())
+        elif op == "tags":
+            tags = parameters[1].split(",")
+            show_list = []
+            for tag in tags:
+                if tag not in self.tags:
+                    return r.Status(False, "\tTag \"%s\" does not exist" % tag)
+                show_list += self.tags[tag]
+            show_list = set(show_list)
+        else:
+            return r.Status(False, "\t Must specify \"all\" or \"tags\"")
         print("\tYour items: " + ", ".join(show_list))
         return r.Status(True)
     
