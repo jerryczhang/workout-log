@@ -181,6 +181,11 @@ class Interface:
             return r.Status(False, "\t Must specify \"all\" or \"tags\"")
         print("\tYour items: " + ", ".join(show_list))
         return r.Status(True)
+
+    def save_tags(self):
+        """Save tags to json."""
+        with open('tags.json','w') as f:
+            json.dump(self.tags, f)
     
     def tag(self, parameters):
         """Tag an item."""
@@ -210,12 +215,11 @@ class Interface:
                 return r.Status(False, "\tItem \"%s\" does not have tag \"%s\""
                         % (item, tag))
             self.tags[tag].remove(item)
-            if self.tags[tag] == []:
+            if not self.tags[tag]:
                 del self.tags[tag]
         else:
             return r.Status(False, "\tMust specify \"add\" or \"remove\"")
-        with open('tags.json','w') as f:
-            json.dump(self.tags, f)
+        self.save_tags()
         return r.Status(True)
 
     def edit(self, parameters):
@@ -291,6 +295,16 @@ class Interface:
         elif len(parameters) == 1:
             if self.get_conf_delete(item.name, "item"):
                 self.logs.pop(item.name)
+                if self.tags:
+                    to_remove = []
+                    for tag, items in self.tags.items():
+                        if item.name in items:
+                            items.remove(item.name)
+                        if not items:
+                            to_remove.append(tag)
+                    for tag in to_remove:
+                        del self.tags[tag]
+                    self.save_tags()
                 return item.delete_item()
             else:
                 return r.Status(False, "\tInput does not match item name, delete cancelled")
