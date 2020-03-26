@@ -322,6 +322,10 @@ class Interface:
             new_name = parameters[1]
             if new_name in self.logs:
                 return r.Status(False, "\tItem \"%s\" already exists" % new_name)
+            if self.tags:
+                for tag, items in self.tags.items():
+                    self.tags[tag] = [new_name if (i == item.name) else i for i in items]
+                self.save_tags()
             return item.rename(new_name)
         elif len(parameters) == 3:
             col = parameters[1]
